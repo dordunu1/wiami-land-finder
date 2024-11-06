@@ -1,10 +1,10 @@
 // Constants for colors and basic icons
 const ZONE_COLORS = {
-    'LEGENDARY': '#9933CC',
-    'MIXED USE': '#FF3366',
-    'INDUSTRIAL': '#FFD700',
     'RESIDENTIAL': '#0066FF',
-    'COMMERCIAL': '#FF6600'
+    'COMMERCIAL': '#00FF00',
+    'INDUSTRIAL': '#FFD700',
+    'MIXED USE': '#FF4500',
+    'LEGENDARY': '#9933CC'
 };
 
 const RANK_ICON = '⭐';
@@ -46,8 +46,13 @@ async function loadParcelData() {
 }
 
 function generateParcelCard(parcel) {
+    const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
+    
     return `
-        <div class="parcel-card" style="border-left: 4px solid ${ZONE_COLORS[parcel.ZONING] || '#FFFFFF'}">
+        <div class="parcel-card" style="
+            background-color: ${zoneColor}99;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
             <div class="card-header">
                 <h2>Plot ${parcel.NAME}</h2>
                 <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
@@ -154,6 +159,19 @@ async function initialize() {
         showError('Failed to initialize the application. Please try again later.');
         console.error('Initialization error:', error);
     }
+}
+
+// Add this helper function to convert hex to RGB
+function getColorRGB(hex) {
+    // Remove the # if present
+    hex = hex.replace('#', '');
+    
+    // Convert hex to RGB
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    
+    return `${r}, ${g}, ${b}`;
 }
 
 // Start the application

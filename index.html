@@ -67,20 +67,60 @@
 
         /* Parcel Card */
         .parcel-card {
-            background: #1E1E1E;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: box-shadow 0.3s ease;
+            transition: all 0.3s ease;
             height: auto;
             min-height: fit-content;
             position: relative;
             margin-bottom: 20px;
         }
 
+        /* Sharp text styles for all cards */
+        .parcel-card h2,
+        .parcel-card .detail-label,
+        .parcel-card .detail-value {
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Text styles for bright backgrounds */
+        .parcel-card[style*="FFD700"],  /* Yellow/Industrial */
+        .parcel-card[style*="00FF00"] { /* Green/Commercial */
+            & h2,
+            & .detail-value {
+                color: #000000;
+                text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+            }
+            
+            & .detail-label {
+                color: rgba(0, 0, 0, 0.85);
+            }
+            
+            & .parcel-detail {
+                border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        /* Darker background text styles */
+        .parcel-card[style*="0066FF"], /* Blue/Residential */
+        .parcel-card[style*="FF4500"], /* Orange/Mixed Use */
+        .parcel-card[style*="9933CC"] { /* Purple/Legendary */
+            & h2,
+            & .detail-value {
+                color: #FFFFFF;
+            }
+            
+            & .detail-label {
+                color: rgba(255, 255, 255, 0.9);
+            }
+            
+            & .parcel-detail {
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            }
+        }
+
         .parcel-card:hover {
-            transform: none;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
         .parcel-card h2 {
@@ -97,7 +137,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .parcel-detail:last-child {
@@ -261,7 +301,7 @@
 
         /* Zoning Legend Styles */
         .zoning-legend {
-            background: #1E1E1E;
+            background: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
             padding: 15px 20px;
             margin: 0 auto 20px;
@@ -291,6 +331,9 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: transform 0.2s ease;
         }
 
         .legend-icon {
@@ -300,6 +343,35 @@
         .legend-text {
             color: #ffffff;
             font-size: 14px;
+        }
+
+        /* Add background colors to legend items */
+        .legend-item[data-zone="Legendary"] {
+            background-color: #9933CC99;
+        }
+
+        .legend-item[data-zone="Mixed Use"] {
+            background-color: #FF450099;
+        }
+
+        .legend-item[data-zone="Residential"] {
+            background-color: #0066FF99;
+        }
+
+        .legend-item[data-zone="Commercial"] {
+            background-color: #00FF0099;
+        }
+
+        .legend-item[data-zone="Industrial"] {
+            background-color: #FFD70099;
+        }
+
+        /* Adjust text colors based on background */
+        .legend-item[data-zone="Commercial"],
+        .legend-item[data-zone="Industrial"] {
+            & .legend-text {
+                color: #000000;
+            }
         }
 
         /* Hero Image Section */
@@ -347,6 +419,13 @@
                 border-radius: 0;
             }
         }
+
+        /* Optional: Style the text color based on background */
+        .parcel-card .detail-label,
+        .parcel-card .detail-value {
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -363,23 +442,23 @@
         <div class="zoning-legend">
             <h4 class="legend-title">Zoning Types</h4>
             <div class="legend-items">
-                <div class="legend-item">
+                <div class="legend-item" data-zone="Legendary">
                     <span class="legend-icon">💎</span>
                     <span class="legend-text">Legendary</span>
                 </div>
-                <div class="legend-item">
+                <div class="legend-item" data-zone="Mixed Use">
                     <span class="legend-icon">🏆</span>
                     <span class="legend-text">Mixed Use</span>
                 </div>
-                <div class="legend-item">
+                <div class="legend-item" data-zone="Residential">
                     <span class="legend-icon">🏠</span>
                     <span class="legend-text">Residential</span>
                 </div>
-                <div class="legend-item">
+                <div class="legend-item" data-zone="Commercial">
                     <span class="legend-icon">🏢</span>
                     <span class="legend-text">Commercial</span>
                 </div>
-                <div class="legend-item">
+                <div class="legend-item" data-zone="Industrial">
                     <span class="legend-icon">🏭</span>
                     <span class="legend-text">Industrial</span>
                 </div>
