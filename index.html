@@ -3,36 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Land Parcel Finder</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <title>Plot Search</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            background: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+        }
+
+        .search-input {
+            width: calc(100% - 120px);
+            padding: 15px;
+            font-size: 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #ffffff;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        #searchButton {
+            padding: 15px 25px;
+            background: #0066FF;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #searchButton:hover {
+            background: #0052cc;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .parcel-card {
+            padding: 20px;
+            border-radius: 8px;
+            background: #1a1a1a;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border-left: 4px solid;
+        }
+
+        .parcel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .parcel-card h2 {
+            margin: 0 0 15px 0;
+            color: #ffffff;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .parcel-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .detail-label {
+            color: #909090;
+        }
+
+        .detail-value {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: #ff4444;
+            padding: 10px;
+            text-align: center;
+            background: rgba(255,68,68,0.1);
+            border-radius: 4px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Land Parcel Finder</h1>
-        </header>
-
-        <div class="search-section">
-            <input type="text" id="searchInput" placeholder="Enter Plot ID (e.g., NX-1, FL-193, SM-263)">
-            <button id="searchButton">Search</button>
-        </div>
-
-        <div class="content">
-            <div class="land-info">
-                <div id="parcelDetails">
-                    <div class="no-result">Enter a plot ID to see details</div>
-                </div>
-            </div>
-            <div class="map-container">
-                <div id="map"></div>
-            </div>
-        </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
+        <button id="searchButton">Search</button>
     </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <div id="parcelDetails"></div>
     <script src="script.js"></script>
 </body>
 </html>
