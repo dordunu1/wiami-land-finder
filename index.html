@@ -204,9 +204,15 @@
         }
 
         .legend-item {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            padding: 4px 0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-right: 8px;
+            color: white;
+            cursor: default;
+            user-select: none;
+            opacity: 1;
         }
 
         .legend-icon {
@@ -611,6 +617,23 @@
         .download-btn:hover {
             transform: scale(1.1);
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-right: 8px;
+            color: white;
+            cursor: default;
+            user-select: none;
+            opacity: 1;
+        }
+
+        .legend-item:hover {
+            transform: none;
+            opacity: 1;
         }
     </style>
 </head>

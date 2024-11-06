@@ -510,14 +510,6 @@ async function initialize() {
             }
         });
 
-        // Setup filter listeners
-        document.querySelectorAll('.legend-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const zoneType = item.getAttribute('data-zone');
-                handleFilter(zoneType);
-            });
-        });
-
     } catch (error) {
         showError('Failed to initialize the application. Please try again later.');
         console.error('Initialization error:', error);
