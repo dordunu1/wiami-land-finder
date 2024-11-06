@@ -31,7 +31,7 @@ let isLoading = false;
 
 // Add these filter category definitions
 const FILTER_OPTIONS = {
-    'All Properties': ['All Properties'],
+    'All': ['All'],
     'Zoning': ['Legendary', 'Mixed Use', 'Residential', 'Commercial', 'Industrial'],
     'Plot Size': ['Giga', 'Nano', 'Micro'],
     'Building Size': ['Megatall', 'Lowrise'],
@@ -219,22 +219,22 @@ function displayParcelDetails(parcels, append = false) {
     }
 }
 
-// Update the filter dropdown HTML to use a custom select with checkboxes
+
+
 function populateFilterDropdown() {
     const filterContainer = document.getElementById('filterType');
     
-    // Add the button that shows/hides the dropdown
     filterContainer.innerHTML = `
-        <button class="filter-button">All Properties</button>
+        <button class="filter-button">Filter</button>
         <div class="filter-menu" style="display: none;">
-            <div class="filter-option" data-value="All Properties">
+            <div class="filter-option" data-value="All">
                 <label>
-                    <input type="checkbox" value="All Properties" checked>
-                    All Properties
+                    <input type="checkbox" value="All" checked>
+                    All
                 </label>
             </div>
             ${Object.entries(FILTER_OPTIONS)
-                .filter(([category]) => category !== 'All Properties')
+                .filter(([category]) => category !== 'All') // Skip 'All' in iteration
                 .map(([category, values]) => `
                     <div class="filter-category">${category}</div>
                     ${values.map(value => `
@@ -249,7 +249,7 @@ function populateFilterDropdown() {
         </div>
     `;
 
-    // Add click handler for the filter button
+    // Rest of your event listeners remain the same
     const filterButton = filterContainer.querySelector('.filter-button');
     const filterMenu = filterContainer.querySelector('.filter-menu');
     
@@ -259,7 +259,6 @@ function populateFilterDropdown() {
         filterMenu.style.display = isFilterOpen ? 'block' : 'none';
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (e) => {
         if (!filterContainer.contains(e.target)) {
             isFilterOpen = false;
@@ -270,17 +269,17 @@ function populateFilterDropdown() {
 
 // Update handleFilter function to handle multiple selections
 function handleFilter(category, value, isChecked) {
-    if (value === 'All Properties') {
-        // Clear all filters if "All Properties" is selected
+    if (value === 'All') {
+        // Clear all filters if "All" is selected
         activeFilters.clear();
         document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
-            if (cb.value !== 'All Properties') {
+            if (cb.value !== 'All') {
                 cb.checked = false;
             }
         });
     } else {
-        // Uncheck "All Properties" when other filters are selected
-        document.querySelector('input[value="All Properties"]').checked = false;
+        // Uncheck "All" when other filters are selected
+        document.querySelector('input[value="All"]').checked = false;
         
         if (isChecked) {
             if (!activeFilters.has(category)) {
@@ -359,7 +358,7 @@ async function initialize() {
                 const option = e.target.closest('.filter-option');
                 const category = option.dataset.category;
                 const value = option.dataset.value;
-                handleFilter(category, value || 'All Properties', e.target.checked);
+                handleFilter(category, value || 'All', e.target.checked);
             }
         });
 
