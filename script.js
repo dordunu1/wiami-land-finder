@@ -210,8 +210,16 @@ function generateParcelCard(parcel) {
                 <span class="detail-value">${parcel.DISTANCE_TO_OCEAN}</span>
             </div>
             <div class="parcel-detail">
+                <span class="detail-label">Distance to Ocean (m):</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN_M}</span>
+            </div>
+            <div class="parcel-detail">
                 <span class="detail-label">Distance to Bay:</span>
                 <span class="detail-value">${parcel.DISTANCE_TO_BAY}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Bay (m):</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_BAY_M}</span>
             </div>
             <div class="parcel-detail">
                 <span class="detail-label">Floors:</span>
