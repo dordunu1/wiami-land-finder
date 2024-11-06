@@ -84,7 +84,7 @@ async function loadParcelData() {
                     'DISTANCE_TO_OCEAN', 'DISTANCE_TO_BAY', 'MAX_FLOORS', 'MIN_FLOORS', 
                     'PLOT_AREA', 'MIN_BUILDING_HEIGHT', 'MAX_BUILDING_HEIGHT', 
                     'DISTANCE_TO_OCEAN_M', 'DISTANCE_TO_BAY_M'],
-            range: 1
+            range: 2
         });
         
         filteredParcels = [...allParcelsData];
