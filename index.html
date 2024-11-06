@@ -10,34 +10,42 @@
             background: #121212;
             color: #ffffff;
             font-family: Arial, sans-serif;
-            margin: 0;
             padding: 20px;
+            line-height: 1.6;
         }
 
         .search-container {
             max-width: 1200px;
-            margin: 0 auto 20px;
+            margin: 0 auto 30px;
+            display: flex;
+            gap: 10px;
         }
 
-        .search-input {
-            width: calc(100% - 120px);
-            padding: 15px;
+        #searchInput {
+            flex: 1;
+            padding: 12px 20px;
             font-size: 16px;
+            border: 2px solid #333;
+            border-radius: 6px;
             background: #1a1a1a;
-            border: 1px solid #333;
             color: #ffffff;
-            border-radius: 4px;
-            margin-right: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #0066FF;
         }
 
         #searchButton {
-            padding: 15px 25px;
+            padding: 12px 30px;
             background: #0066FF;
             border: none;
+            border-radius: 6px;
             color: white;
-            border-radius: 4px;
-            cursor: pointer;
             font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         #searchButton:hover {
@@ -46,59 +54,129 @@
 
         .results-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
         .parcel-card {
-            padding: 20px;
-            border-radius: 8px;
             background: #1a1a1a;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            border-left: 4px solid;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .parcel-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
 
         .parcel-card h2 {
-            margin: 0 0 15px 0;
-            color: #ffffff;
+            margin: 0 0 20px 0;
+            padding-bottom: 15px;
             border-bottom: 1px solid #333;
-            padding-bottom: 8px;
+            color: #ffffff;
             font-size: 24px;
         }
 
         .parcel-detail {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            color: #e0e0e0;
-            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid #252525;
+        }
+
+        .parcel-detail:last-child {
+            border-bottom: none;
         }
 
         .detail-label {
             color: #909090;
+            font-size: 14px;
         }
 
         .detail-value {
             color: #ffffff;
             font-weight: 500;
+            text-align: right;
         }
 
         .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border-left: 4px solid #ff4444;
             color: #ff4444;
-            padding: 10px;
+            padding: 15px 20px;
+            border-radius: 6px;
             text-align: center;
-            background: rgba(255,68,68,0.1);
-            border-radius: 4px;
             max-width: 1200px;
             margin: 0 auto;
+            font-size: 16px;
+        }
+
+        .filter-container {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #filterInput {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #333;
+            border-radius: 6px;
+            background: #242424;
+            color: #ffffff;
+            transition: border-color 0.3s ease;
+        }
+
+        #filterInput:focus {
+            outline: none;
+            border-color: #0066FF;
+        }
+
+        .filter-stats {
+            color: #909090;
+            font-size: 14px;
+            text-align: right;
+        }
+
+        .filter-stats span {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Add highlight for matched text */
+        .highlight {
+            background-color: rgba(0, 102, 255, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+            }
+            
+            #searchInput, #searchButton {
+                width: 100%;
+            }
+            
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .parcel-card {
+                margin: 0 10px;
+            }
         }
     </style>
 </head>

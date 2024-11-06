@@ -8,7 +8,7 @@ const ZONE_COLORS = {
 
 async function loadParcelData() {
     try {
-        const response = await fetch('data/parcels.xlsx');
+        const response = await fetch('./data/parcels.xlsx');
         const arrayBuffer = await response.arrayBuffer();
         const data = new Uint8Array(arrayBuffer);
         
@@ -46,6 +46,32 @@ async function loadParcelData() {
     }
 }
 
+function filterDisplayedParcels(parcels, filterText) {
+    if (!filterText) return parcels;
+    
+    filterText = filterText.toLowerCase();
+    return parcels.filter(parcel => {
+        // Convert all values to lowercase strings for comparison
+        const searchableValues = {
+            name: parcel.NAME?.toString().toLowerCase(),
+            neighborhood: parcel.NEIGHBORHOOD?.toString().toLowerCase(),
+            zoning: parcel.ZONING?.toString().toLowerCase(),
+            plotSize: parcel.PLOT_SIZE?.toString().toLowerCase(),
+            buildingSize: parcel.BUILDING_SIZE?.toString().toLowerCase(),
+            distanceOcean: parcel.DISTANCE_TO_OCEAN?.toString().toLowerCase(),
+            distanceBay: parcel.DISTANCE_TO_BAY?.toString().toLowerCase(),
+            floors: `${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}`.toLowerCase(),
+            plotArea: parcel.PLOT_AREA?.toString().toLowerCase(),
+            buildingHeight: `${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT}`.toLowerCase()
+        };
+
+        // Check if any value contains the filter text
+        return Object.values(searchableValues).some(value => 
+            value && value.includes(filterText)
+        );
+    });
+}
+
 function displayParcelDetails(parcels) {
     const detailsDiv = document.getElementById('parcelDetails');
     
@@ -54,69 +80,97 @@ function displayParcelDetails(parcels) {
         return;
     }
 
+    detailsDiv.setAttribute('data-parcels', JSON.stringify(parcels));
+
     const html = `
+        <div class="filter-container">
+            <input 
+                type="text" 
+                id="filterInput" 
+                placeholder="Filter results by any property (e.g., 'residential', 'large', 'nexus')"
+            >
+            <div class="filter-stats">
+                Showing <span id="filteredCount">${parcels.length}</span> of <span id="totalCount">${parcels.length}</span> parcels
+            </div>
+        </div>
         <div class="results-container">
-            ${parcels.map(parcel => `
-                <div class="parcel-card" style="border-left: 4px solid ${ZONE_COLORS[parcel.ZONING] || '#FFFFFF'}">
-                    <h2>Plot ${parcel.NAME}</h2>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Rank:</span>
-                        <span class="detail-value">${parcel.RANK}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Neighborhood:</span>
-                        <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Zoning:</span>
-                        <span class="detail-value">${parcel.ZONING}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Plot Size:</span>
-                        <span class="detail-value">${parcel.PLOT_SIZE}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Building Size:</span>
-                        <span class="detail-value">${parcel.BUILDING_SIZE}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Distance to Ocean:</span>
-                        <span class="detail-value">${parcel.DISTANCE_TO_OCEAN}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Distance to Bay:</span>
-                        <span class="detail-value">${parcel.DISTANCE_TO_BAY}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Floors:</span>
-                        <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Plot Area:</span>
-                        <span class="detail-value">${parcel.PLOT_AREA} m²</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Building Height:</span>
-                        <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Distance to Ocean (m):</span>
-                        <span class="detail-value">${parcel.DISTANCE_TO_OCEAN_M}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Distance to Bay (m):</span>
-                        <span class="detail-value">${parcel.DISTANCE_TO_BAY_M}</span>
-                    </div>
-                    <div class="parcel-detail">
-                        <span class="detail-label">Additional Data:</span>
-                        <span class="detail-value">${parcel.ADDITIONAL_DATA || 'N/A'}</span>
-                    </div>
-                </div>
-            `).join('')}
+            ${generateParcelCards(parcels)}
         </div>
     `;
 
     detailsDiv.innerHTML = html;
+
+    // Add filter functionality
+    const filterInput = document.getElementById('filterInput');
+    const filteredCount = document.getElementById('filteredCount');
+    const totalCount = document.getElementById('totalCount');
+    const resultsContainer = detailsDiv.querySelector('.results-container');
+
+    filterInput.addEventListener('input', (e) => {
+        const filterText = e.target.value;
+        const storedParcels = JSON.parse(detailsDiv.getAttribute('data-parcels'));
+        const filteredParcels = filterDisplayedParcels(storedParcels, filterText);
+        
+        resultsContainer.innerHTML = generateParcelCards(filteredParcels);
+        filteredCount.textContent = filteredParcels.length;
+    });
+}
+
+// Helper function to generate parcel cards HTML
+function generateParcelCards(parcels) {
+    return parcels.map(parcel => `
+        <div class="parcel-card" style="border-left: 4px solid ${ZONE_COLORS[parcel.ZONING] || '#FFFFFF'}">
+            <h2>Plot ${parcel.NAME}</h2>
+            <div class="parcel-detail">
+                <span class="detail-label">Rank:</span>
+                <span class="detail-value">${parcel.RANK}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Neighborhood:</span>
+                <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Zoning:</span>
+                <span class="detail-value">${parcel.ZONING}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Plot Size:</span>
+                <span class="detail-value">${parcel.PLOT_SIZE}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Building Size:</span>
+                <span class="detail-value">${parcel.BUILDING_SIZE}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Ocean:</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Bay:</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_BAY}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Floors:</span>
+                <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Plot Area:</span>
+                <span class="detail-value">${parcel.PLOT_AREA} m²</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Building Height:</span>
+                <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Ocean (m):</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN_M}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Bay (m):</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_BAY_M}</span>
+            </div>
+        </div>
+    `).join('');
 }
 
 function showError(message) {
