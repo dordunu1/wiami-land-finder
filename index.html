@@ -205,6 +205,33 @@
                 margin: 0 10px;
             }
         }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+
+        .zone-icon {
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Special styling for legendary and mixed use icons */
+        .zone-icon:has(💎),
+        .zone-icon:has(🏆) {
+            font-size: 2em;
+        }
     </style>
 </head>
 <body>

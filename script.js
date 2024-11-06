@@ -11,8 +11,8 @@ const NEIGHBORHOOD_ICON = '📍';
 const ZONING_ICONS = {
     'LEGENDARY': '💎',
     'MIXED USE': '🏆',
-    'RESIDENTIAL': '🏠',
     'COMMERCIAL': '🏢',
+    'RESIDENTIAL': '🏠',
     'INDUSTRIAL': '🏭'
 };
 
@@ -42,7 +42,9 @@ async function loadParcelData() {
 function generateParcelCard(parcel) {
     return `
         <div class="parcel-card" style="border-left: 4px solid ${ZONE_COLORS[parcel.ZONING] || '#FFFFFF'}">
-            <h2>Plot ${parcel.NAME}</h2>
+            <div class="card-header">
+                <h2>Plot ${parcel.NAME} ${ZONING_ICONS[parcel.ZONING] || ''}</h2>
+            </div>
             <div class="parcel-detail">
                 <span class="detail-label">
                     <span class="icon">${RANK_ICON}</span>
@@ -58,10 +60,7 @@ function generateParcelCard(parcel) {
                 <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
             </div>
             <div class="parcel-detail">
-                <span class="detail-label">
-                    <span class="icon">${ZONING_ICONS[parcel.ZONING] || ''}</span>
-                    Zoning:
-                </span>
+                <span class="detail-label">Zoning:</span>
                 <span class="detail-value">${parcel.ZONING}</span>
             </div>
             <div class="parcel-detail">
@@ -103,6 +102,10 @@ function displayParcelDetails(parcels) {
         detailsDiv.innerHTML = '<div class="error-message">No parcels found. Please check the Plot IDs and try again.</div>';
         return;
     }
+
+    parcels.forEach(parcel => {
+        console.log('Parcel Zoning:', parcel.ZONING, 'Icon:', ZONING_ICONS[parcel.ZONING]);
+    });
 
     detailsDiv.innerHTML = `
         <div class="results-container">
