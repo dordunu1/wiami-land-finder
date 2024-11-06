@@ -426,6 +426,60 @@
             color: #ffffff;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
+
+        /* Add these new styles for filter functionality */
+        .legend-item {
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .legend-item:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+
+        .legend-item.active {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        /* Add loading indicator styles */
+        .scroll-sentinel {
+            height: 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: #909090;
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #333;
+            border-top: 3px solid #0066FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Optional: Add filter dropdown styles */
+        .filter-dropdown {
+            background: rgba(30, 30, 30, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .filter-dropdown:hover {
+            background: rgba(40, 40, 40, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -435,6 +489,14 @@
     
     <div class="content-wrapper">
         <div class="search-container">
+            <select id="filterType" class="filter-dropdown">
+                <option value="All Properties">All Properties</option>
+                <option value="Legendary">Legendary</option>
+                <option value="Mixed Use">Mixed Use</option>
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Industrial">Industrial</option>
+            </select>
             <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
             <button id="searchButton">Search</button>
         </div>
@@ -442,31 +504,38 @@
         <div class="zoning-legend">
             <h4 class="legend-title">Zoning Types</h4>
             <div class="legend-items">
-                <div class="legend-item" data-zone="Legendary">
+                <div class="legend-item" data-zone="Legendary" data-filter="true">
                     <span class="legend-icon">💎</span>
                     <span class="legend-text">Legendary</span>
                 </div>
-                <div class="legend-item" data-zone="Mixed Use">
+                <div class="legend-item" data-zone="Mixed Use" data-filter="true">
                     <span class="legend-icon">🏆</span>
                     <span class="legend-text">Mixed Use</span>
                 </div>
-                <div class="legend-item" data-zone="Residential">
+                <div class="legend-item" data-zone="Residential" data-filter="true">
                     <span class="legend-icon">🏠</span>
                     <span class="legend-text">Residential</span>
                 </div>
-                <div class="legend-item" data-zone="Commercial">
+                <div class="legend-item" data-zone="Commercial" data-filter="true">
                     <span class="legend-icon">🏢</span>
                     <span class="legend-text">Commercial</span>
                 </div>
-                <div class="legend-item" data-zone="Industrial">
+                <div class="legend-item" data-zone="Industrial" data-filter="true">
                     <span class="legend-icon">🏭</span>
                     <span class="legend-text">Industrial</span>
                 </div>
             </div>
         </div>
         
-        <div id="parcelDetails"></div>
+        <div id="parcelDetails">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+        
+        <div class="scroll-sentinel">
+            <div class="loading-spinner"></div>
+        </div>
     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
