@@ -136,17 +136,24 @@ function loadMoreParcels(reset = false) {
     }
 }
 
+// Update generateParcelCard to add data-plot-id
 function generateParcelCard(parcel) {
     const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
+    const parcelData = btoa(JSON.stringify(parcel));
     
     return `
-        <div class="parcel-card" style="
+        <div class="parcel-card" data-plot-id="${parcel.NAME}" style="
             background-color: ${zoneColor}99;
             backdrop-filter: blur(8px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
             <div class="card-header">
                 <h2>Plot ${parcel.NAME}</h2>
-                <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
+                <div class="card-actions">
+                    <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
+                    <button class="download-btn" onclick="handleDownload('${parcelData}')">
+                        💾
+                    </button>
+                </div>
             </div>
             <div class="parcel-detail">
                 <span class="detail-label">
@@ -198,6 +205,45 @@ function generateParcelCard(parcel) {
     `;
 }
 
+// Add this new function to handle the download
+async function handleDownload(encodedData) {
+    try {
+        const parcel = JSON.parse(atob(encodedData));
+        const card = document.querySelector(`[data-plot-id="${parcel.NAME}"]`);
+        const downloadBtn = card.querySelector('.download-btn');
+        
+        // Temporarily hide the download button
+        downloadBtn.style.display = 'none';
+        
+        // Create image from the card
+        const canvas = await html2canvas(card, {
+            backgroundColor: null,
+            scale: 2, // Higher quality
+            logging: false,
+            useCORS: true
+        });
+        
+        // Show the download button again
+        downloadBtn.style.display = '';
+        
+        // Convert canvas to blob
+        canvas.toBlob((blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Plot-${parcel.NAME}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        }, 'image/png');
+    } catch (error) {
+        console.error('Error processing download:', error);
+    }
+}
+
+
+
 function displayParcelDetails(parcels, append = false) {
     const detailsDiv = document.getElementById('parcelDetails');
     
@@ -219,7 +265,47 @@ function displayParcelDetails(parcels, append = false) {
     }
 }
 
+// Add this function to your code
+function downloadParcelCard(parcel) {
+    // Prevent the default click behavior
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Create the content for the text file
+    const content = `PLOT ${parcel.NAME} DETAILS
+------------------------
+Rank: ${parcel.RANK}
+Neighborhood: ${parcel.NEIGHBORHOOD}
+Zoning: ${parcel.ZONING}
+Plot Size: ${parcel.PLOT_SIZE}
+Building Size: ${parcel.BUILDING_SIZE}
+Distance to Ocean: ${parcel.DISTANCE_TO_OCEAN}
+Distance to Bay: ${parcel.DISTANCE_TO_BAY}
+Floors: ${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}
+Plot Area: ${parcel.PLOT_AREA} m²
+Building Height: ${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m
+Distance to Ocean (m): ${parcel.DISTANCE_TO_OCEAN_M}
+Distance to Bay (m): ${parcel.DISTANCE_TO_BAY_M}`;
 
+    // Create a Blob containing the text
+    const blob = new Blob([content], { type: 'text/plain' });
+    
+    // Create a temporary URL for the Blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create a temporary link element
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Plot-${parcel.NAME}-Details.txt`;
+    
+    // Append link to body, click it, and remove it
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the URL
+    window.URL.revokeObjectURL(url);
+}
 
 function populateFilterDropdown() {
     const filterContainer = document.getElementById('filterType');
@@ -423,3 +509,4 @@ function showError(message) {
 
 // Start the application
 initialize();
+

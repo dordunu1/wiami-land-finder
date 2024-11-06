@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plot Search</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         /* Base Styles */
         body {
@@ -588,6 +589,28 @@
                 margin: 20px auto;
                 max-width: 90%;
             }
+        }
+
+        .card-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: inherit;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
