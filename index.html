@@ -232,6 +232,60 @@
         .zone-icon:has(🏆) {
             font-size: 2em;
         }
+
+        /* Hover effect for zoning icons */
+        .zone-icon {
+            transition: transform 0.3s ease, filter 0.3s ease;
+            cursor: help;
+        }
+
+        .zone-icon:hover {
+            transform: scale(1.2);
+            filter: brightness(1.2);
+        }
+
+        /* Zoning Legend Styles */
+        .zoning-legend {
+            background: #1E1E1E;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 0 auto 20px;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .legend-title {
+            color: #909090;
+            margin: 0;
+            font-size: 14px;
+            font-weight: 600;
+            padding-right: 20px;
+            border-right: 1px solid #333;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-icon {
+            font-size: 1.4em;
+        }
+
+        .legend-text {
+            color: #ffffff;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -239,6 +293,33 @@
         <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
         <button id="searchButton">Search</button>
     </div>
+    
+    <div class="zoning-legend">
+        <h4 class="legend-title">Zoning Types</h4>
+        <div class="legend-items">
+            <div class="legend-item">
+                <span class="legend-icon">💎</span>
+                <span class="legend-text">Legendary</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🏆</span>
+                <span class="legend-text">Mixed Use</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🏠</span>
+                <span class="legend-text">Residential</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🏢</span>
+                <span class="legend-text">Commercial</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-icon">🏭</span>
+                <span class="legend-text">Industrial</span>
+            </div>
+        </div>
+    </div>
+
     <div id="parcelDetails"></div>
     <script src="script.js"></script>
 </body>
