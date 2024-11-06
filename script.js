@@ -1,3 +1,4 @@
+// Constants for colors and basic icons
 const ZONE_COLORS = {
     'LEGENDARY': '#9933CC',
     'MIXED USE': '#FF3366',
@@ -8,13 +9,18 @@ const ZONE_COLORS = {
 
 const RANK_ICON = '⭐';
 const NEIGHBORHOOD_ICON = '📍';
-const ZONING_ICONS = {
-    'LEGENDARY': '💎',
-    'MIXED USE': '🏆',
-    'COMMERCIAL': '🏢',
-    'RESIDENTIAL': '🏠',
-    'INDUSTRIAL': '🏭'
-};
+
+// Function to get zoning icon
+function getZoningIcon(zoning) {
+    switch(zoning.toUpperCase()) {
+        case 'LEGENDARY': return '💎';
+        case 'MIXED USE': return '🏆';
+        case 'RESIDENTIAL': return '🏠';
+        case 'COMMERCIAL': return '🏢';
+        case 'INDUSTRIAL': return '🏭';
+        default: return '';
+    }
+}
 
 async function loadParcelData() {
     try {
@@ -31,7 +37,7 @@ async function loadParcelData() {
                     'DISTANCE_TO_OCEAN', 'DISTANCE_TO_BAY', 'MAX_FLOORS', 'MIN_FLOORS', 
                     'PLOT_AREA', 'MIN_BUILDING_HEIGHT', 'MAX_BUILDING_HEIGHT', 
                     'DISTANCE_TO_OCEAN_M', 'DISTANCE_TO_BAY_M'],
-            range: 1 // Skip header row
+            range: 1
         });
     } catch (error) {
         console.error('Error loading parcel data:', error);
@@ -43,7 +49,8 @@ function generateParcelCard(parcel) {
     return `
         <div class="parcel-card" style="border-left: 4px solid ${ZONE_COLORS[parcel.ZONING] || '#FFFFFF'}">
             <div class="card-header">
-                <h2>Plot ${parcel.NAME} ${ZONING_ICONS[parcel.ZONING] || ''}</h2>
+                <h2>Plot ${parcel.NAME}</h2>
+                <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
             </div>
             <div class="parcel-detail">
                 <span class="detail-label">
@@ -103,10 +110,6 @@ function displayParcelDetails(parcels) {
         return;
     }
 
-    parcels.forEach(parcel => {
-        console.log('Parcel Zoning:', parcel.ZONING, 'Icon:', ZONING_ICONS[parcel.ZONING]);
-    });
-
     detailsDiv.innerHTML = `
         <div class="results-container">
             ${parcels.map(generateParcelCard).join('')}
@@ -122,17 +125,17 @@ function showError(message) {
 async function initialize() {
     try {
         const parcelsData = await loadParcelData();
-        console.log('Loaded parcels:', parcelsData[0]); // Debug log
-
         const searchButton = document.getElementById('searchButton');
         const searchInput = document.getElementById('searchInput');
 
         searchButton.addEventListener('click', () => {
             const searchTerms = searchInput.value.trim().toUpperCase().split(/[\s,]+/);
-            console.log('Searching for:', searchTerms); // Debug log
-
+            
             const foundParcels = searchTerms
-                .map(term => parcelsData.find(p => p.NAME === term))
+                .map(term => {
+                    const cleanTerm = term.replace(/\s+/g, '-');
+                    return parcelsData.find(p => p && p.NAME && p.NAME.toString().toUpperCase() === cleanTerm);
+                })
                 .filter(Boolean);
 
             if (foundParcels.length) {
