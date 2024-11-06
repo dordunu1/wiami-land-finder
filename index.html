@@ -559,6 +559,36 @@
         .filter-button:hover {
             background: rgba(40, 40, 40, 0.8);
         }
+
+        .typewriter-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            max-width: 250px;
+            pointer-events: none;
+        }
+
+        .typewriter {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            white-space: pre-wrap;
+            font-size: 12px;
+            line-height: 1.4;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .typewriter-container {
+                position: static;
+                margin: 20px auto;
+                max-width: 90%;
+            }
+        }
     </style>
 </head>
 <body>

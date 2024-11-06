@@ -71,6 +71,48 @@ async function loadParcelData() {
     }
 }
 
+// Add this function at the top of your file, after the constants
+function setupTypewriter() {
+    const content = `Wiami Urban Planning Plot Search
+
+Core Features:
+• Search plots by ID
+• Multi-Filter System
+• Real-time filtering
+• Dynamic loading (20 plots/page)
+• Color-coded zoning types
+
+Filter Categories:
+• Zoning: Legendary, Mixed Use, Residential, Commercial, Industrial
+• Plot & Building Sizes
+• Ocean & Bay Distance`; 
+
+    const typewriterDiv = document.createElement('div');
+    typewriterDiv.className = 'typewriter';
+    const typewriterContainer = document.createElement('div');
+    typewriterContainer.className = 'typewriter-container';
+    document.querySelector('.content-wrapper').prepend(typewriterContainer);
+    typewriterContainer.appendChild(typewriterDiv);
+
+    let i = 0;
+    const speed = 30;
+
+    function typeWriter() {
+        if (i < content.length) {
+            const char = content.charAt(i);
+            if (char === '\n') {
+                typewriterDiv.innerHTML += '<br>';
+            } else {
+                typewriterDiv.innerHTML += char;
+            }
+            i++;
+            setTimeout(typeWriter, speed);
+        }
+    }
+
+    typeWriter();
+}
+
 function loadMoreParcels(reset = false) {
     if (isLoading) return;
     isLoading = true;
@@ -306,6 +348,7 @@ function setupInfiniteScroll() {
 
 async function initialize() {
     try {
+        setupTypewriter();
         await loadParcelData();
         setupInfiniteScroll();
         populateFilterDropdown();
