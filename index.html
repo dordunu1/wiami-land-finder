@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Parcel Finder</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Land Parcel Finder</h1>
+        </header>
+
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="Enter Plot ID (e.g., NX-1, FL-193, SM-263)">
+            <button id="searchButton">Search</button>
+        </div>
+
+        <div class="content">
+            <div class="land-info">
+                <div id="parcelDetails">
+                    <div class="no-result">Enter a plot ID to see details</div>
+                </div>
+            </div>
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
