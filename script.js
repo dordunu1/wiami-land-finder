@@ -39,6 +39,12 @@ const FILTER_OPTIONS = {
     'Distance to Bay': ['Close', 'Medium', 'Far']
 };
 
+// Add this to track active filters
+let activeFilters = new Map(); // category -> Set of values
+
+// Add this to track dropdown state
+let isFilterOpen = false;
+
 async function loadParcelData() {
     try {
         const response = await fetch('./data/parcels.xlsx');
@@ -171,48 +177,108 @@ function displayParcelDetails(parcels, append = false) {
     }
 }
 
-// Update populateFilterDropdown function
+// Update the filter dropdown HTML to use a custom select with checkboxes
 function populateFilterDropdown() {
-    const filterSelect = document.getElementById('filterType');
-    let options = '<option value="All Properties">All Properties</option>';
+    const filterContainer = document.getElementById('filterType');
     
-    Object.entries(FILTER_OPTIONS).forEach(([category, values]) => {
-        if (category !== 'All Properties') {
-            options += `<optgroup label="${category}">`;
-            values.forEach(value => {
-                options += `<option value="${category}:${value}">${value}</option>`;
-            });
-            options += '</optgroup>';
+    // Add the button that shows/hides the dropdown
+    filterContainer.innerHTML = `
+        <button class="filter-button">All Properties</button>
+        <div class="filter-menu" style="display: none;">
+            <div class="filter-option" data-value="All Properties">
+                <label>
+                    <input type="checkbox" value="All Properties" checked>
+                    All Properties
+                </label>
+            </div>
+            ${Object.entries(FILTER_OPTIONS)
+                .filter(([category]) => category !== 'All Properties')
+                .map(([category, values]) => `
+                    <div class="filter-category">${category}</div>
+                    ${values.map(value => `
+                        <div class="filter-option" data-category="${category}" data-value="${value}">
+                            <label>
+                                <input type="checkbox" value="${value}">
+                                ${value}
+                            </label>
+                        </div>
+                    `).join('')}
+                `).join('')}
+        </div>
+    `;
+
+    // Add click handler for the filter button
+    const filterButton = filterContainer.querySelector('.filter-button');
+    const filterMenu = filterContainer.querySelector('.filter-menu');
+    
+    filterButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isFilterOpen = !isFilterOpen;
+        filterMenu.style.display = isFilterOpen ? 'block' : 'none';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!filterContainer.contains(e.target)) {
+            isFilterOpen = false;
+            filterMenu.style.display = 'none';
         }
     });
-    
-    filterSelect.innerHTML = options;
 }
 
-// Update handleFilter function to work with new filter structure
-function handleFilter(filterValue) {
-    if (filterValue === 'All Properties') {
-        filteredParcels = [...allParcelsData];
-    } else {
-        const [category, value] = filterValue.split(':');
-        
-        filteredParcels = allParcelsData.filter(parcel => {
-            switch(category) {
-                case 'Zoning':
-                    return parcel.ZONING === value;
-                case 'Plot Size':
-                    return parcel.PLOT_SIZE === value;
-                case 'Building Size':
-                    return parcel.BUILDING_SIZE === value;
-                case 'Distance to Ocean':
-                    return parcel.DISTANCE_TO_OCEAN === value;
-                case 'Distance to Bay':
-                    return parcel.DISTANCE_TO_BAY === value;
-                default:
-                    return true;
+// Update handleFilter function to handle multiple selections
+function handleFilter(category, value, isChecked) {
+    if (value === 'All Properties') {
+        // Clear all filters if "All Properties" is selected
+        activeFilters.clear();
+        document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
+            if (cb.value !== 'All Properties') {
+                cb.checked = false;
             }
         });
+    } else {
+        // Uncheck "All Properties" when other filters are selected
+        document.querySelector('input[value="All Properties"]').checked = false;
+        
+        if (isChecked) {
+            if (!activeFilters.has(category)) {
+                activeFilters.set(category, new Set());
+            }
+            activeFilters.get(category).add(value);
+        } else {
+            if (activeFilters.has(category)) {
+                activeFilters.get(category).delete(value);
+                if (activeFilters.get(category).size === 0) {
+                    activeFilters.delete(category);
+                }
+            }
+        }
     }
+
+    // Apply all active filters
+    if (activeFilters.size === 0) {
+        filteredParcels = [...allParcelsData];
+    } else {
+        filteredParcels = allParcelsData.filter(parcel => {
+            return Array.from(activeFilters.entries()).every(([category, values]) => {
+                switch(category) {
+                    case 'Zoning':
+                        return values.has(parcel.ZONING);
+                    case 'Plot Size':
+                        return values.has(parcel.PLOT_SIZE);
+                    case 'Building Size':
+                        return values.has(parcel.BUILDING_SIZE);
+                    case 'Distance to Ocean':
+                        return values.has(parcel.DISTANCE_TO_OCEAN);
+                    case 'Distance to Bay':
+                        return values.has(parcel.DISTANCE_TO_BAY);
+                    default:
+                        return true;
+                }
+            });
+        });
+    }
+    
     loadMoreParcels(true);
 }
 
@@ -244,10 +310,14 @@ async function initialize() {
         setupInfiniteScroll();
         populateFilterDropdown();
 
-        // Update filter dropdown listener
-        const filterSelect = document.getElementById('filterType');
-        filterSelect.addEventListener('change', (e) => {
-            handleFilter(e.target.value);
+        // Update filter event listeners
+        document.getElementById('filterType').addEventListener('change', (e) => {
+            if (e.target.type === 'checkbox') {
+                const option = e.target.closest('.filter-option');
+                const category = option.dataset.category;
+                const value = option.dataset.value;
+                handleFilter(category, value || 'All Properties', e.target.checked);
+            }
         });
 
         // Setup search functionality
