@@ -6,6 +6,7 @@
     <title>Plot Search</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        /* Base Styles */
         body {
             background: #121212;
             color: #ffffff;
@@ -14,6 +15,7 @@
             line-height: 1.6;
         }
 
+        /* Search Container */
         .search-container {
             max-width: 1200px;
             margin: 0 auto 30px;
@@ -52,20 +54,24 @@
             background: #0052cc;
         }
 
+        /* Results Container */
         .results-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 20px;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
+        /* Parcel Card */
         .parcel-card {
-            background: #1a1a1a;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            background: #1E1E1E;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .parcel-card:hover {
@@ -81,11 +87,13 @@
             font-size: 24px;
         }
 
+        /* Card Details */
         .parcel-detail {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #252525;
+            border-bottom: 1px solid #333;
         }
 
         .parcel-detail:last-child {
@@ -94,7 +102,9 @@
 
         .detail-label {
             color: #909090;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .detail-value {
@@ -103,6 +113,67 @@
             text-align: right;
         }
 
+        /* Icons */
+        .icon {
+            font-size: 1.2em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+        }
+
+        .detail-label .icon:has(💎),
+        .detail-label .icon:has(🏆) {
+            font-size: 1.4em;
+        }
+
+        /* Legend */
+        .icon-legend {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 0 auto 20px;
+            max-width: 1200px;
+        }
+
+        .legend-grid {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-section {
+            min-width: 200px;
+            flex: 1;
+        }
+
+        .legend-section h4 {
+            color: #909090;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .legend-icon {
+            font-size: 1.2em;
+            width: 30px;
+            text-align: center;
+        }
+
+        .legend-text {
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        /* Error Message */
         .error-message {
             background: rgba(255, 68, 68, 0.1);
             border-left: 4px solid #ff4444;
@@ -115,58 +186,14 @@
             font-size: 16px;
         }
 
-        .filter-container {
-            max-width: 1200px;
-            margin: 0 auto 20px;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        #filterInput {
-            width: 100%;
-            padding: 12px 20px;
-            font-size: 16px;
-            border: 2px solid #333;
-            border-radius: 6px;
-            background: #242424;
-            color: #ffffff;
-            transition: border-color 0.3s ease;
-        }
-
-        #filterInput:focus {
-            outline: none;
-            border-color: #0066FF;
-        }
-
-        .filter-stats {
-            color: #909090;
-            font-size: 14px;
-            text-align: right;
-        }
-
-        .filter-stats span {
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        /* Add highlight for matched text */
-        .highlight {
-            background-color: rgba(0, 102, 255, 0.2);
-            padding: 2px 4px;
-            border-radius: 3px;
-        }
-
-        /* Responsive adjustments */
+        /* Responsive Design */
         @media (max-width: 768px) {
             .search-container {
                 flex-direction: column;
             }
             
-            #searchInput, #searchButton {
+            #searchInput, 
+            #searchButton {
                 width: 100%;
             }
             
@@ -182,7 +209,7 @@
 </head>
 <body>
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-input" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
+        <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
         <button id="searchButton">Search</button>
     </div>
     <div id="parcelDetails"></div>
