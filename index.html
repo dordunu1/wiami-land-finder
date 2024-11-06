@@ -11,7 +11,7 @@
             background: #121212;
             color: #ffffff;
             font-family: Arial, sans-serif;
-            padding: 20px;
+            padding: 0;
             line-height: 1.6;
         }
 
@@ -21,6 +21,7 @@
             margin: 0 auto 30px;
             display: flex;
             gap: 10px;
+            padding: 0 20px;
         }
 
         #searchInput {
@@ -57,12 +58,11 @@
         /* Results Container */
         .results-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 400px));
-            gap: 20px;
+            grid-template-columns: repeat(3, minmax(300px, 1fr));
+            gap: 40px;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            justify-content: center;
         }
 
         /* Parcel Card */
@@ -70,16 +70,17 @@
             background: #1E1E1E;
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            width: 100%;
-            max-width: 400px;
+            transition: box-shadow 0.3s ease;
+            height: auto;
+            min-height: fit-content;
+            position: relative;
+            margin-bottom: 20px;
         }
 
         .parcel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            transform: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
 
         .parcel-card h2 {
@@ -101,6 +102,8 @@
 
         .parcel-detail:last-child {
             border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
         }
 
         .detail-label {
@@ -190,25 +193,31 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1200px) {
+            .results-container {
+                grid-template-columns: repeat(2, minmax(300px, 1fr));
+                padding: 16px;
+                gap: 32px;
+            }
+        }
+
         @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
+            .results-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+                padding: 12px;
             }
-            
-            #searchInput, 
-            #searchButton {
-                width: 100%;
-            }
-            
+        }
+
+        @media (max-width: 640px) {
             .results-container {
                 grid-template-columns: 1fr;
                 padding: 10px;
+                gap: 20px;
             }
             
             .parcel-card {
-                margin: 0 auto;
-                width: 100%;
-                max-width: 400px;
+                max-width: 100%;
             }
         }
 
@@ -292,41 +301,93 @@
             color: #ffffff;
             font-size: 14px;
         }
+
+        /* Hero Image Section */
+        .hero-image {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        /* Search container and legend styles */
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto 30px;
+            display: flex;
+            gap: 10px;
+            background: rgba(30, 30, 30, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .zoning-legend {
+            background: rgba(30, 30, 30, 0.8);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-image {
+                margin: 0 auto 20px;
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
-        <button id="searchButton">Search</button>
+    <div class="hero-image">
+        <img src="./images/miami.png" alt="Miami Urban Plan" />
     </div>
     
-    <div class="zoning-legend">
-        <h4 class="legend-title">Zoning Types</h4>
-        <div class="legend-items">
-            <div class="legend-item">
-                <span class="legend-icon">💎</span>
-                <span class="legend-text">Legendary</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-icon">🏆</span>
-                <span class="legend-text">Mixed Use</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-icon">🏠</span>
-                <span class="legend-text">Residential</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-icon">🏢</span>
-                <span class="legend-text">Commercial</span>
-            </div>
-            <div class="legend-item">
-                <span class="legend-icon">🏭</span>
-                <span class="legend-text">Industrial</span>
+    <div class="content-wrapper">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas)">
+            <button id="searchButton">Search</button>
+        </div>
+        
+        <div class="zoning-legend">
+            <h4 class="legend-title">Zoning Types</h4>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-icon">💎</span>
+                    <span class="legend-text">Legendary</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🏆</span>
+                    <span class="legend-text">Mixed Use</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🏠</span>
+                    <span class="legend-text">Residential</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🏢</span>
+                    <span class="legend-text">Commercial</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-icon">🏭</span>
+                    <span class="legend-text">Industrial</span>
+                </div>
             </div>
         </div>
+        
+        <div id="parcelDetails"></div>
     </div>
-
-    <div id="parcelDetails"></div>
     <script src="script.js"></script>
 </body>
 </html>
