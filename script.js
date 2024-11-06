@@ -33,8 +33,32 @@ let isLoading = false;
 const FILTER_OPTIONS = {
     'All': ['All'],
     'Zoning': ['Legendary', 'Mixed Use', 'Residential', 'Commercial', 'Industrial'],
-    'Plot Size': ['Giga', 'Nano', 'Micro'],
-    'Building Size': ['Megatall', 'Lowrise'],
+    'Neighborhood': [
+        'Flashing Lights',
+        'North Star',
+        'Nexus',
+        'District ZERO',
+        'Tranquility Gardens',
+        'Space Mind',
+        'Haven Heights',
+        'Little Meow'
+    ],
+    'Plot Size': [
+        'Micro',
+        'Mid',
+        'Nano',
+        'Macro',
+        'Mammoth',
+        'Giga',
+        'Mega'
+    ],
+    'Building Size': [
+        'Megatall',
+        'Supertall',
+        'Highrise',
+        'Tall',
+        'Lowrise'
+    ],
     'Distance to Ocean': ['Close', 'Medium', 'Far'],
     'Distance to Bay': ['Close', 'Medium', 'Far']
 };
@@ -383,28 +407,31 @@ function handleFilter(category, value, isChecked) {
     }
 
     // Apply all active filters
-    if (activeFilters.size === 0) {
-        filteredParcels = [...allParcelsData];
-    } else {
-        filteredParcels = allParcelsData.filter(parcel => {
-            return Array.from(activeFilters.entries()).every(([category, values]) => {
-                switch(category) {
-                    case 'Zoning':
-                        return values.has(parcel.ZONING);
-                    case 'Plot Size':
-                        return values.has(parcel.PLOT_SIZE);
-                    case 'Building Size':
-                        return values.has(parcel.BUILDING_SIZE);
-                    case 'Distance to Ocean':
-                        return values.has(parcel.DISTANCE_TO_OCEAN);
-                    case 'Distance to Bay':
-                        return values.has(parcel.DISTANCE_TO_BAY);
-                    default:
-                        return true;
-                }
-            });
+    // Inside handleFilter function, update the switch statement
+if (activeFilters.size === 0) {
+    filteredParcels = [...allParcelsData];
+} else {
+    filteredParcels = allParcelsData.filter(parcel => {
+        return Array.from(activeFilters.entries()).every(([category, values]) => {
+            switch(category) {
+                case 'Zoning':
+                    return values.has(parcel.ZONING);
+                case 'Neighborhood':
+                    return values.has(parcel.NEIGHBORHOOD);
+                case 'Plot Size':
+                    return values.has(parcel.PLOT_SIZE);
+                case 'Building Size':
+                    return values.has(parcel.BUILDING_SIZE);
+                case 'Distance to Ocean':
+                    return values.has(parcel.DISTANCE_TO_OCEAN);
+                case 'Distance to Bay':
+                    return values.has(parcel.DISTANCE_TO_BAY);
+                default:
+                    return true;
+            }
         });
-    }
+    });
+}
     
     loadMoreParcels(true);
 }
