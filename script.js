@@ -1,4 +1,4 @@
-// Constants for colors and basic icons
+// Constants
 const ZONE_COLORS = {
     'RESIDENTIAL': '#0066FF',
     'COMMERCIAL': '#00FF00',
@@ -9,27 +9,18 @@ const ZONE_COLORS = {
 
 const RANK_ICON = '⭐';
 const NEIGHBORHOOD_ICON = '📍';
-
-// Function to get zoning icon
-function getZoningIcon(zoning) {
-    switch(zoning.toUpperCase()) {
-        case 'LEGENDARY': return '💎';
-        case 'MIXED USE': return '🏆';
-        case 'RESIDENTIAL': return '🏠';
-        case 'COMMERCIAL': return '🏢';
-        case 'INDUSTRIAL': return '🏭';
-        default: return '';
-    }
-}
-
-// Add new constants for pagination
+const VIDEO_ICON = '🎥';
 const PARCELS_PER_PAGE = 4444;
+
+// Global state
 let currentPage = 0;
 let allParcelsData = [];
 let filteredParcels = [];
 let isLoading = false;
+let isFilterOpen = false;
+let activeFilters = new Map();
 
-// Add these filter category definitions
+// Filter options
 const FILTER_OPTIONS = {
     'All': ['All'],
     'Zoning': ['Legendary', 'Mixed Use', 'Residential', 'Commercial', 'Industrial'],
@@ -43,116 +34,187 @@ const FILTER_OPTIONS = {
         'Haven Heights',
         'Little Meow'
     ],
-    'Plot Size': [
-        'Micro',
-        'Mid',
-        'Nano',
-        'Macro',
-        'Mammoth',
-        'Giga',
-        'Mega'
-    ],
-    'Building Size': [
-        'Megatall',
-        'Supertall',
-        'Highrise',
-        'Tall',
-        'Lowrise'
-    ],
+    'Plot Size': ['Micro', 'Mid', 'Nano', 'Macro', 'Mammoth', 'Giga', 'Mega'],
+    'Building Size': ['Megatall', 'Supertall', 'Highrise', 'Tall', 'Lowrise'],
     'Distance to Ocean': ['Close', 'Medium', 'Far'],
     'Distance to Bay': ['Close', 'Medium', 'Far']
 };
 
-// Add this to track active filters
-let activeFilters = new Map(); // category -> Set of values
-
-// Add this to track dropdown state
-let isFilterOpen = false;
+function getZoningIcon(zoning) {
+    switch(zoning.toUpperCase()) {
+        case 'LEGENDARY': return '💎';
+        case 'MIXED USE': return '🏆';
+        case 'RESIDENTIAL': return '🏠';
+        case 'COMMERCIAL': return '🏢';
+        case 'INDUSTRIAL': return '🏭';
+        default: return '';
+    }
+}
 
 async function loadParcelData() {
     try {
-        const response = await fetch('./data/parcels.xlsx');
-        const arrayBuffer = await response.arrayBuffer();
-        const data = new Uint8Array(arrayBuffer);
+        // Load both data sources
+        const [jsonResponse, xlsxResponse] = await Promise.all([
+            fetch('./data/metadata.json'),
+            fetch('./data/parcels.xlsx')
+        ]);
+
+        if (!jsonResponse.ok) {
+            throw new Error(`HTTP error loading JSON! status: ${jsonResponse.status}`);
+        }
+
+        // Parse JSON data
+        const jsonData = await jsonResponse.json();
+        console.log('JSON Data first entry:', jsonData.nfts[0]); // Debug log
+
+        // Parse XLSX data
+        const xlsxBuffer = await xlsxResponse.arrayBuffer();
+        const workbook = XLSX.read(xlsxBuffer);
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        
-        allParcelsData = XLSX.utils.sheet_to_json(firstSheet, {
-            raw: true,
-            header: ['RANK', 'NAME', 'NEIGHBORHOOD', 'ZONING', 'PLOT_SIZE', 'BUILDING_SIZE', 
-                    'DISTANCE_TO_OCEAN', 'DISTANCE_TO_BAY', 'MAX_FLOORS', 'MIN_FLOORS', 
-                    'PLOT_AREA', 'MIN_BUILDING_HEIGHT', 'MAX_BUILDING_HEIGHT', 
-                    'DISTANCE_TO_OCEAN_M', 'DISTANCE_TO_BAY_M'],
-            range: 2
+        // Get the range of the worksheet
+        const range = XLSX.utils.decode_range(worksheet['!ref']);
+        console.log('XLSX Range:', range); // Debug log
+
+        // Convert XLSX to JSON starting from row 3
+        const rankings = XLSX.utils.sheet_to_json(worksheet, {
+            range: 2,  // Start from row 3
+            header: ['Rank', 'Name', 'Neighborhood', 'Zoning Type', 'Plot Size', 'Building Size', 
+                    'Distance to Ocean', 'Distance to Bay', 'Max # of Floors', 'Min # of Floors', 
+                    'Plot Area (m²)', 'Min Building Height (m)', 'Max Building Height (m)', 
+                    'Distance to Ocean (m)', 'Distance to Bay (m)']
         });
+
+        console.log('First XLSX entry:', rankings[0]); // Debug log
+
+        // Create video URL map from JSON
+        const videoMap = new Map();
+        jsonData.nfts.forEach(nft => {
+            if (nft.metadata && nft.metadata.name) {
+                videoMap.set(nft.metadata.name, {
+                    video: nft.metadata.animation_url,
+                    image: nft.metadata.image
+                });
+            }
+        });
+
+        console.log('Video Map size:', videoMap.size); // Debug log
+        console.log('First few video map entries:', 
+            Array.from(videoMap.entries()).slice(0, 3)); // Debug log
+
+        // Merge data
+        allParcelsData = rankings
+            .map(ranking => {
+                const plotName = ranking.Name;
+                const mediaData = videoMap.get(plotName);
+
+                if (!mediaData) {
+                    console.warn(`No media data found for plot: ${plotName}`);
+                    return null;
+                }
+
+                return {
+                    NAME: plotName,
+                    RANK: ranking.Rank,
+                    NEIGHBORHOOD: ranking.Neighborhood,
+                    ZONING: ranking['Zoning Type'],
+                    PLOT_SIZE: ranking['Plot Size'],
+                    BUILDING_SIZE: ranking['Building Size'],
+                    DISTANCE_TO_OCEAN: ranking['Distance to Ocean'],
+                    DISTANCE_TO_BAY: ranking['Distance to Bay'],
+                    MAX_FLOORS: ranking['Max # of Floors'],
+                    MIN_FLOORS: ranking['Min # of Floors'],
+                    PLOT_AREA: ranking['Plot Area (m²)'],
+                    MIN_BUILDING_HEIGHT: ranking['Min Building Height (m)'],
+                    MAX_BUILDING_HEIGHT: ranking['Max Building Height (m)'],
+                    DISTANCE_TO_OCEAN_M: ranking['Distance to Ocean (m)'],
+                    DISTANCE_TO_BAY_M: ranking['Distance to Bay (m)'],
+                    VIDEO_URL: mediaData.video,
+                    IMAGE_URL: mediaData.image
+                };
+            })
+            .filter(Boolean);
+
+        console.log('First few merged records:', allParcelsData.slice(0, 3));
         
+        if (allParcelsData.length === 0) {
+            throw new Error('No data after merging XLSX and JSON');
+        }
+
         filteredParcels = [...allParcelsData];
         return loadMoreParcels(true);
+
     } catch (error) {
-        console.error('Error loading parcel data:', error);
-        throw new Error('Failed to load parcel data');
+        console.error('Error in loadParcelData:', error);
+        showError(`Failed to load parcel data: ${error.message}`);
+        throw error;
     }
 }
-
-// Update the click handler
-document.querySelector('.typewriter-close').addEventListener('click', function() {
-    const containers = document.querySelectorAll('.typewriter-container');
-    containers.forEach(container => {
-        container.classList.add('hidden');
-        // Optional: completely remove from DOM
-        // container.remove();
-    });
-});
-// Add this function at the top of your file, after the constants
-function setupTypewriter() {
-    const content = `Miami Urban Planning
-Plot Search
-
-Core Features:
-• Search plots by ID
-• Multi-Filter System
-• Real-time filtering
-• Dynamic loading (20 plots/page)
-• Color-coded zoning types
-
-Filter Categories:
-• Zoning: Legendary, Mixed Use, Residential, Commercial, Industrial
-• Plot & Building Sizes
-• Ocean & Bay Distance`; 
-
-    // Clear existing content first
-    const typewriterDiv = document.querySelector('.typewriter');
-    typewriterDiv.innerHTML = '<button class="typewriter-close"></button>';
+function generateParcelCard(parcel) {
+    const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
+    const parcelData = btoa(JSON.stringify(parcel));
     
-    // Create a content container
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'typewriter-content';
-    typewriterDiv.appendChild(contentDiv);
-
-    let i = 0;
-    const speed = 30;
-
-    function typeWriter() {
-        if (i < content.length) {
-            const char = content.charAt(i);
-            if (char === '\n') {
-                contentDiv.innerHTML += '<br>';
-            } else {
-                contentDiv.innerHTML += char;
-            }
-            i++;
-            setTimeout(typeWriter, speed);
-        }
-    }
-
-    // Add close button handler
-    document.querySelector('.typewriter-close').addEventListener('click', function() {
-        document.querySelector('.typewriter-container').remove();
-    });
-
-    typeWriter();
+    return `
+        <div class="parcel-card" data-plot-id="${parcel.NAME}" style="background-color: ${zoneColor}99">
+            <div class="card-header">
+                <h2>Plot ${parcel.NAME}</h2>
+                <div class="card-actions">
+                    <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
+                    ${parcel.VIDEO_URL ? 
+                        `<a href="${parcel.VIDEO_URL}" target="_blank" class="video-btn" title="Watch Plot Video">
+                            ${VIDEO_ICON}
+                        </a>` : ''}
+                    <button class="download-btn" onclick="handleDownload('${parcelData}')">💾</button>
+                </div>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">
+                    <span class="icon">${RANK_ICON}</span>Rank
+                </span>
+                <span class="detail-value">${parcel.RANK}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">
+                    <span class="icon">${NEIGHBORHOOD_ICON}</span>Neighborhood
+                </span>
+                <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Zoning</span>
+                <span class="detail-value">${parcel.ZONING}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Plot Size</span>
+                <span class="detail-value">${parcel.PLOT_SIZE}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Building Size</span>
+                <span class="detail-value">${parcel.BUILDING_SIZE}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Floors</span>
+                <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Plot Area</span>
+                <span class="detail-value">${parcel.PLOT_AREA} m²</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Building Height</span>
+                <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Ocean</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN} (${parcel.DISTANCE_TO_OCEAN_M}m)</span>
+            </div>
+            <div class="parcel-detail">
+                <span class="detail-label">Distance to Bay</span>
+                <span class="detail-value">${parcel.DISTANCE_TO_BAY} (${parcel.DISTANCE_TO_BAY_M}m)</span>
+            </div>
+        </div>
+    `;
 }
+
 function loadMoreParcels(reset = false) {
     if (isLoading) return;
     isLoading = true;
@@ -176,182 +238,31 @@ function loadMoreParcels(reset = false) {
     }
 }
 
-// Update generateParcelCard to add data-plot-id
-function generateParcelCard(parcel) {
-    const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
-    const parcelData = btoa(JSON.stringify(parcel));
-    
-    return `
-        <div class="parcel-card" data-plot-id="${parcel.NAME}" style="
-            background-color: ${zoneColor}99;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
-            <div class="card-header">
-                <h2>Plot ${parcel.NAME}</h2>
-                <div class="card-actions">
-                    <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
-                    <button class="download-btn" onclick="handleDownload('${parcelData}')">
-                        💾
-                    </button>
-                </div>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">
-                    <span class="icon">${RANK_ICON}</span>
-                    Rank:
-                </span>
-                <span class="detail-value">${parcel.RANK}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">
-                    <span class="icon">${NEIGHBORHOOD_ICON}</span>
-                    Neighborhood:
-                </span>
-                <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Zoning:</span>
-                <span class="detail-value">${parcel.ZONING}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Plot Size:</span>
-                <span class="detail-value">${parcel.PLOT_SIZE}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Building Size:</span>
-                <span class="detail-value">${parcel.BUILDING_SIZE}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Ocean:</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Ocean (m):</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN_M}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Bay:</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_BAY}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Bay (m):</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_BAY_M}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Floors:</span>
-                <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Plot Area:</span>
-                <span class="detail-value">${parcel.PLOT_AREA} m²</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Building Height:</span>
-                <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
-            </div>
-        </div>
-    `;
-}
-
-// Add this new function to handle the download
-async function handleDownload(encodedData) {
-    try {
-        const parcel = JSON.parse(atob(encodedData));
-        const card = document.querySelector(`[data-plot-id="${parcel.NAME}"]`);
-        const downloadBtn = card.querySelector('.download-btn');
-        
-        // Temporarily hide the download button
-        downloadBtn.style.display = 'none';
-        
-        // Create image from the card
-        const canvas = await html2canvas(card, {
-            backgroundColor: null,
-            scale: 2, // Higher quality
-            logging: false,
-            useCORS: true
-        });
-        
-        // Show the download button again
-        downloadBtn.style.display = '';
-        
-        // Convert canvas to blob
-        canvas.toBlob((blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Plot-${parcel.NAME}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-        }, 'image/png');
-    } catch (error) {
-        console.error('Error processing download:', error);
-    }
-}
-
-
-
 function displayParcelDetails(parcels, append = false) {
-    const detailsDiv = document.getElementById('parcelDetails');
+    const container = document.getElementById('parcelDetails');
+    const content = parcels.map(parcel => generateParcelCard(parcel)).join('');
     
-    if (!parcels.length && !append) {
-        detailsDiv.innerHTML = '<div class="error-message">No parcels found. Please check the Plot IDs and try again.</div>';
-        return;
-    }
-
-    const newContent = `
-        <div class="results-container">
-            ${parcels.map(generateParcelCard).join('')}
-        </div>
-    `;
-
     if (append) {
-        detailsDiv.insertAdjacentHTML('beforeend', newContent);
+        container.innerHTML += content;
     } else {
-        detailsDiv.innerHTML = newContent;
+        container.innerHTML = content;
     }
 }
 
-// Add this function to your code
-function downloadParcelCard(parcel) {
-    // Prevent the default click behavior
-    event.preventDefault();
-    event.stopPropagation();
+function handleDownload(parcelData) {
+    const parcel = JSON.parse(atob(parcelData));
+    const content = Object.entries(parcel)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
     
-    // Create the content for the text file
-    const content = `PLOT ${parcel.NAME} DETAILS
-------------------------
-Rank: ${parcel.RANK}
-Neighborhood: ${parcel.NEIGHBORHOOD}
-Zoning: ${parcel.ZONING}
-Plot Size: ${parcel.PLOT_SIZE}
-Building Size: ${parcel.BUILDING_SIZE}
-Distance to Ocean: ${parcel.DISTANCE_TO_OCEAN}
-Distance to Bay: ${parcel.DISTANCE_TO_BAY}
-Floors: ${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}
-Plot Area: ${parcel.PLOT_AREA} m²
-Building Height: ${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m
-Distance to Ocean (m): ${parcel.DISTANCE_TO_OCEAN_M}
-Distance to Bay (m): ${parcel.DISTANCE_TO_BAY_M}`;
-
-    // Create a Blob containing the text
     const blob = new Blob([content], { type: 'text/plain' });
-    
-    // Create a temporary URL for the Blob
     const url = window.URL.createObjectURL(blob);
-    
-    // Create a temporary link element
     const link = document.createElement('a');
     link.href = url;
     link.download = `Plot-${parcel.NAME}-Details.txt`;
-    
-    // Append link to body, click it, and remove it
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    // Clean up the URL
     window.URL.revokeObjectURL(url);
 }
 
@@ -368,7 +279,7 @@ function populateFilterDropdown() {
                 </label>
             </div>
             ${Object.entries(FILTER_OPTIONS)
-                .filter(([category]) => category !== 'All') // Skip 'All' in iteration
+                .filter(([category]) => category !== 'All')
                 .map(([category, values]) => `
                     <div class="filter-category">${category}</div>
                     ${values.map(value => `
@@ -383,7 +294,11 @@ function populateFilterDropdown() {
         </div>
     `;
 
-    // Rest of your event listeners remain the same
+    setupFilterEventListeners();
+}
+
+function setupFilterEventListeners() {
+    const filterContainer = document.getElementById('filterType');
     const filterButton = filterContainer.querySelector('.filter-button');
     const filterMenu = filterContainer.querySelector('.filter-menu');
     
@@ -399,12 +314,19 @@ function populateFilterDropdown() {
             filterMenu.style.display = 'none';
         }
     });
+
+    filterContainer.addEventListener('change', (e) => {
+        if (e.target.type === 'checkbox') {
+            const option = e.target.closest('.filter-option');
+            const category = option.dataset.category;
+            const value = option.dataset.value;
+            handleFilter(category, value || 'All', e.target.checked);
+        }
+    });
 }
 
-// Update handleFilter function to handle multiple selections
 function handleFilter(category, value, isChecked) {
     if (value === 'All') {
-        // Clear all filters if "All" is selected
         activeFilters.clear();
         document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(cb => {
             if (cb.value !== 'All') {
@@ -412,7 +334,6 @@ function handleFilter(category, value, isChecked) {
             }
         });
     } else {
-        // Uncheck "All" when other filters are selected
         document.querySelector('input[value="All"]').checked = false;
         
         if (isChecked) {
@@ -430,32 +351,34 @@ function handleFilter(category, value, isChecked) {
         }
     }
 
-    // Apply all active filters
-    // Inside handleFilter function, update the switch statement
-if (activeFilters.size === 0) {
-    filteredParcels = [...allParcelsData];
-} else {
-    filteredParcels = allParcelsData.filter(parcel => {
-        return Array.from(activeFilters.entries()).every(([category, values]) => {
-            switch(category) {
-                case 'Zoning':
-                    return values.has(parcel.ZONING);
-                case 'Neighborhood':
-                    return values.has(parcel.NEIGHBORHOOD);
-                case 'Plot Size':
-                    return values.has(parcel.PLOT_SIZE);
-                case 'Building Size':
-                    return values.has(parcel.BUILDING_SIZE);
-                case 'Distance to Ocean':
-                    return values.has(parcel.DISTANCE_TO_OCEAN);
-                case 'Distance to Bay':
-                    return values.has(parcel.DISTANCE_TO_BAY);
-                default:
-                    return true;
-            }
-        });
-    });
+    applyFilters();
 }
+
+function applyFilters() {
+    if (activeFilters.size === 0) {
+        filteredParcels = [...allParcelsData];
+    } else {
+        filteredParcels = allParcelsData.filter(parcel => {
+            return Array.from(activeFilters.entries()).every(([category, values]) => {
+                switch(category) {
+                    case 'Zoning':
+                        return values.has(parcel.ZONING);
+                    case 'Neighborhood':
+                        return values.has(parcel.NEIGHBORHOOD);
+                    case 'Plot Size':
+                        return values.has(parcel.PLOT_SIZE);
+                    case 'Building Size':
+                        return values.has(parcel.BUILDING_SIZE);
+                    case 'Distance to Ocean':
+                        return values.has(parcel.DISTANCE_TO_OCEAN);
+                    case 'Distance to Bay':
+                        return values.has(parcel.DISTANCE_TO_BAY);
+                    default:
+                        return true;
+                }
+            });
+        });
+    }
     
     loadMoreParcels(true);
 }
@@ -475,31 +398,23 @@ function setupInfiniteScroll() {
         });
     }, options);
 
-    // Create and observe sentinel element
     const sentinel = document.createElement('div');
     sentinel.className = 'scroll-sentinel';
     document.getElementById('parcelDetails').appendChild(sentinel);
     observer.observe(sentinel);
 }
 
+function showError(message) {
+    const detailsDiv = document.getElementById('parcelDetails');
+    detailsDiv.innerHTML = `<div class="error-message">${message}</div>`;
+}
+
 async function initialize() {
     try {
-        setupTypewriter();
         await loadParcelData();
         setupInfiniteScroll();
         populateFilterDropdown();
 
-        // Update filter event listeners
-        document.getElementById('filterType').addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox') {
-                const option = e.target.closest('.filter-option');
-                const category = option.dataset.category;
-                const value = option.dataset.value;
-                handleFilter(category, value || 'All', e.target.checked);
-            }
-        });
-
-        // Setup search functionality
         const searchButton = document.getElementById('searchButton');
         const searchInput = document.getElementById('searchInput');
 
@@ -527,29 +442,10 @@ async function initialize() {
         });
 
     } catch (error) {
-        showError('Failed to initialize the application. Please try again later.');
         console.error('Initialization error:', error);
+        showError('Failed to initialize the application');
     }
-}
-
-// Add this helper function to convert hex to RGB
-function getColorRGB(hex) {
-    // Remove the # if present
-    hex = hex.replace('#', '');
-    
-    // Convert hex to RGB
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
-    
-    return `${r}, ${g}, ${b}`;
-}
-
-function showError(message) {
-    const detailsDiv = document.getElementById('parcelDetails');
-    detailsDiv.innerHTML = `<div class="error-message">${message}</div>`;
 }
 
 // Start the application
 initialize();
-

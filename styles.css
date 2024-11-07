@@ -50,8 +50,8 @@ body {
 /* Results Container */
 .results-container {
     display: grid;
-    grid-template-columns: repeat(3, minmax(300px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
@@ -59,11 +59,14 @@ body {
 
 /* Parcel Card */
 .parcel-card {
+    display: flex;
+    flex-direction: column;
     padding: 15px;
-    margin-bottom: 20px;
+    margin: 0;
     border-radius: 12px;
     color: white;
     font-size: 14px;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 /* Sharp text styles for all cards */
@@ -234,29 +237,25 @@ body {
 /* Responsive Design */
 @media (max-width: 1200px) {
     .results-container {
-        grid-template-columns: repeat(2, minmax(300px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         padding: 16px;
-        gap: 32px;
+        gap: 20px;
     }
 }
 
 @media (max-width: 768px) {
     .results-container {
         grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
+        gap: 15px;
         padding: 12px;
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 480px) {
     .results-container {
         grid-template-columns: 1fr;
         padding: 10px;
-        gap: 20px;
-    }
-    
-    .parcel-card {
-        max-width: 100%;
+        gap: 15px;
     }
 }
 
@@ -634,5 +633,24 @@ body {
 @media (max-width: 380px) {
     .legend-items {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Make sure cards don't stretch too wide */
+@media (min-width: 1201px) {
+    .results-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1200px) and (min-width: 769px) {
+    .results-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .results-container {
+        grid-template-columns: repeat(1, 1fr);
     }
 }
