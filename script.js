@@ -52,7 +52,7 @@ function getZoningIcon(zoning) {
 }
 
 function setupTypewriter() {
-    const content = `Miami Urban Planning
+    const content = `Wiami Urban Planning
 Plot Search
 
 Core Features:
