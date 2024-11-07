@@ -51,6 +51,66 @@ function getZoningIcon(zoning) {
     }
 }
 
+function setupTypewriter() {
+    const content = `Miami Urban Planning
+Plot Search
+
+Core Features:
+• Official XLSX Rankings Integration
+• Search plots by ID
+• Multi-Filter System
+• Real-time filtering
+• Dynamic loading (20 plots/page)
+• Color-coded zoning types
+• Plot video previews
+• Downloadable plot data
+
+Zoning Types:
+• Legendary 💎
+• Mixed Use 🏆
+• Residential 🏠
+• Commercial 🏢
+• Industrial 🏭
+
+Data Sources:
+• Rankings: Official XLSX File
+• Media: JSON Metadata
+• Plot Details: Merged Data
+
+Instructions:
+1. Use the search bar to find specific plots
+2. Apply filters to narrow down results
+3. Click 🎥 to view plot video
+4. Click 💾 to download plot details`;
+
+    const typewriterContainer = document.createElement('div');
+    typewriterContainer.className = 'typewriter-container';
+    typewriterContainer.innerHTML = `
+        <div class="typewriter">
+            <button class="typewriter-close"></button>
+            <div class="typewriter-content"></div>
+        </div>
+    `;
+    document.body.appendChild(typewriterContainer);
+
+    const typewriterContent = typewriterContainer.querySelector('.typewriter-content');
+    let i = 0;
+
+    function typeWriter() {
+        if (i < content.length) {
+            typewriterContent.textContent += content.charAt(i);
+            i++;
+            setTimeout(typeWriter, 20);
+        }
+    }
+
+    typewriterContainer.querySelector('.typewriter-close').addEventListener('click', function() {
+        typewriterContainer.classList.add('hidden');
+    });
+
+    typeWriter();
+}
+
 async function loadParcelData() {
     try {
         // Load both data sources
@@ -411,6 +471,7 @@ function showError(message) {
 
 async function initialize() {
     try {
+        setupTypewriter();
         await loadParcelData();
         setupInfiniteScroll();
         populateFilterDropdown();
