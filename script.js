@@ -57,6 +57,7 @@ Plot Search
 
 Core Features:
 • Official XLSX Rankings Integration
+• Interactive Hologram Plot Images
 • Search plots by ID
 • Multi-Filter System
 • Real-time filtering
@@ -74,14 +75,20 @@ Zoning Types:
 
 Data Sources:
 • Rankings: Official XLSX File
-• Media: JSON Metadata
+• Media: JSON Metadata & Arweave Images
 • Plot Details: Merged Data
+
+Special Features:
+• 🎥 Video Preview
+• 💾 Download Details
+• 🌟 Hover for 3D Hologram View
 
 Instructions:
 1. Use the search bar to find specific plots
 2. Apply filters to narrow down results
-3. Click 🎥 to view plot video
-4. Click 💾 to download plot details`;
+3. Hover over plots to see hologram effect
+4. Click 🎥 to view plot video
+5. Click 💾 to download plot details`;
 
     const typewriterContainer = document.createElement('div');
     typewriterContainer.className = 'typewriter-container';
