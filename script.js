@@ -213,67 +213,82 @@ async function loadParcelData() {
 function generateParcelCard(parcel) {
     const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
     const parcelData = btoa(JSON.stringify(parcel));
+    const imageUrl = parcel.IMAGE_URL ? parcel.IMAGE_URL.replace('ar://', 'https://arweave.net/') : '';
     
     return `
         <div class="parcel-card" data-plot-id="${parcel.NAME}" style="background-color: ${zoneColor}99">
-            <div class="card-header">
-                <h2>Plot ${parcel.NAME}</h2>
-                <div class="card-actions">
-                    <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
-                    ${parcel.VIDEO_URL ? 
-                        `<a href="${parcel.VIDEO_URL}" target="_blank" class="video-btn" title="Watch Plot Video">
-                            ${VIDEO_ICON}
-                        </a>` : ''}
-                    <button class="download-btn" onclick="handleDownload('${parcelData}')">💾</button>
+            ${imageUrl ? `
+            <div class="hologram-overlay">
+                <img src="${imageUrl}" 
+                     class="hologram-image" 
+                     alt="Plot ${parcel.NAME}"
+                     onerror="this.style.display='none'"
+                     loading="lazy">
+                <div class="hologram-glitch"></div>
+            </div>
+            ` : ''}
+            <div class="card-content">
+                <div class="card-header">
+                    <h2>Plot ${parcel.NAME}</h2>
+                    <div class="card-actions">
+                        <div class="zone-icon">${getZoningIcon(parcel.ZONING)}</div>
+                        ${parcel.VIDEO_URL ? 
+                            `<a href="${parcel.VIDEO_URL}" target="_blank" class="video-btn" title="Watch Plot Video">
+                                ${VIDEO_ICON}
+                            </a>` : ''}
+                        <button class="download-btn" onclick="handleDownload('${parcelData}')">💾</button>
+                    </div>
                 </div>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">
-                    <span class="icon">${RANK_ICON}</span>Rank
-                </span>
-                <span class="detail-value">${parcel.RANK}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">
-                    <span class="icon">${NEIGHBORHOOD_ICON}</span>Neighborhood
-                </span>
-                <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Zoning</span>
-                <span class="detail-value">${parcel.ZONING}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Plot Size</span>
-                <span class="detail-value">${parcel.PLOT_SIZE}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Building Size</span>
-                <span class="detail-value">${parcel.BUILDING_SIZE}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Floors</span>
-                <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Plot Area</span>
-                <span class="detail-value">${parcel.PLOT_AREA} m²</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Building Height</span>
-                <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Ocean</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_OCEAN} (${parcel.DISTANCE_TO_OCEAN_M}m)</span>
-            </div>
-            <div class="parcel-detail">
-                <span class="detail-label">Distance to Bay</span>
-                <span class="detail-value">${parcel.DISTANCE_TO_BAY} (${parcel.DISTANCE_TO_BAY_M}m)</span>
+                <div class="parcel-detail">
+                    <span class="detail-label">
+                        <span class="icon">${RANK_ICON}</span>Rank
+                    </span>
+                    <span class="detail-value">${parcel.RANK}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">
+                        <span class="icon">${NEIGHBORHOOD_ICON}</span>Neighborhood
+                    </span>
+                    <span class="detail-value">${parcel.NEIGHBORHOOD}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Zoning</span>
+                    <span class="detail-value">${parcel.ZONING}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Plot Size</span>
+                    <span class="detail-value">${parcel.PLOT_SIZE}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Building Size</span>
+                    <span class="detail-value">${parcel.BUILDING_SIZE}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Floors</span>
+                    <span class="detail-value">${parcel.MIN_FLOORS} - ${parcel.MAX_FLOORS}</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Plot Area</span>
+                    <span class="detail-value">${parcel.PLOT_AREA} m²</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Building Height</span>
+                    <span class="detail-value">${parcel.MIN_BUILDING_HEIGHT} - ${parcel.MAX_BUILDING_HEIGHT} m</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Distance to Ocean</span>
+                    <span class="detail-value">${parcel.DISTANCE_TO_OCEAN} (${parcel.DISTANCE_TO_OCEAN_M}m)</span>
+                </div>
+                <div class="parcel-detail">
+                    <span class="detail-label">Distance to Bay</span>
+                    <span class="detail-value">${parcel.DISTANCE_TO_BAY} (${parcel.DISTANCE_TO_BAY_M}m)</span>
+                </div>
             </div>
         </div>
     `;
 }
+
+
 
 function loadMoreParcels(reset = false) {
     if (isLoading) return;

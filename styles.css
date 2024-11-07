@@ -67,6 +67,9 @@ body {
     color: white;
     font-size: 14px;
     background: rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: visible;
+    transition: transform 0.3s ease;
 }
 
 /* Sharp text styles for all cards */
@@ -669,4 +672,98 @@ body {
     .results-container {
         grid-template-columns: repeat(1, 1fr);
     }
+}
+
+.hologram-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease;
+    perspective: 1000px;
+}
+
+.hologram-image {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    object-fit: cover;
+    filter: 
+        brightness(1.1)
+        contrast(1.1)
+        drop-shadow(0 0 8px rgba(0, 255, 255, 0.3));
+    transform-style: preserve-3d;
+    animation: hologramFloat 4s ease-in-out infinite;
+}
+
+.hologram-glitch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        transparent 0%,
+        rgba(0, 255, 255, 0.1) 50%,
+        transparent 100%
+    );
+    animation: hologramGlitch 3s infinite linear;
+}
+
+/* Show hologram on hover */
+.parcel-card:hover .hologram-overlay {
+    opacity: 1;
+    transform: scale(1.05) translateY(-10px);
+}
+
+.parcel-card:hover .card-content {
+    opacity: 0.15;
+}
+
+@keyframes hologramFloat {
+    0%, 100% {
+        transform: 
+            translateZ(0) 
+            rotateX(0deg) 
+            rotateY(0deg);
+    }
+    50% {
+        transform: 
+            translateZ(30px) 
+            rotateX(2deg) 
+            rotateY(-2deg);
+    }
+}
+
+@keyframes hologramGlitch {
+    0% {
+        transform: translateX(-100%) skewX(-45deg);
+    }
+    100% {
+        transform: translateX(200%) skewX(-45deg);
+    }
+}
+
+/* Add scanline effect */
+.hologram-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 255, 0.05) 0%,
+        rgba(0, 255, 255, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
 }
