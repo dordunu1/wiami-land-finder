@@ -95,9 +95,19 @@ async function loadParcelData() {
     }
 }
 
+// Update the click handler
+document.querySelector('.typewriter-close').addEventListener('click', function() {
+    const containers = document.querySelectorAll('.typewriter-container');
+    containers.forEach(container => {
+        container.classList.add('hidden');
+        // Optional: completely remove from DOM
+        // container.remove();
+    });
+});
 // Add this function at the top of your file, after the constants
 function setupTypewriter() {
-    const content = `Wiami Urban Planning Plot Search
+    const content = `Miami Urban Planning
+Plot Search
 
 Core Features:
 • Search plots by ID
@@ -111,12 +121,14 @@ Filter Categories:
 • Plot & Building Sizes
 • Ocean & Bay Distance`; 
 
-    const typewriterDiv = document.createElement('div');
-    typewriterDiv.className = 'typewriter';
-    const typewriterContainer = document.createElement('div');
-    typewriterContainer.className = 'typewriter-container';
-    document.querySelector('.content-wrapper').prepend(typewriterContainer);
-    typewriterContainer.appendChild(typewriterDiv);
+    // Clear existing content first
+    const typewriterDiv = document.querySelector('.typewriter');
+    typewriterDiv.innerHTML = '<button class="typewriter-close"></button>';
+    
+    // Create a content container
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'typewriter-content';
+    typewriterDiv.appendChild(contentDiv);
 
     let i = 0;
     const speed = 30;
@@ -125,18 +137,22 @@ Filter Categories:
         if (i < content.length) {
             const char = content.charAt(i);
             if (char === '\n') {
-                typewriterDiv.innerHTML += '<br>';
+                contentDiv.innerHTML += '<br>';
             } else {
-                typewriterDiv.innerHTML += char;
+                contentDiv.innerHTML += char;
             }
             i++;
             setTimeout(typeWriter, speed);
         }
     }
 
+    // Add close button handler
+    document.querySelector('.typewriter-close').addEventListener('click', function() {
+        document.querySelector('.typewriter-container').remove();
+    });
+
     typeWriter();
 }
-
 function loadMoreParcels(reset = false) {
     if (isLoading) return;
     isLoading = true;

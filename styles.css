@@ -1,0 +1,638 @@
+/* Base Styles */
+body {
+    background: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* Search Container */
+.search-container {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+}
+
+#searchInput {
+    flex: 1;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: 2px solid #333;
+    border-radius: 6px;
+    background: #1a1a1a;
+    color: #ffffff;
+    transition: border-color 0.3s ease;
+}
+
+#searchInput:focus {
+    outline: none;
+    border-color: #0066FF;
+}
+
+#searchButton {
+    padding: 12px 30px;
+    background: #0066FF;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#searchButton:hover {
+    background: #0052cc;
+}
+
+/* Results Container */
+.results-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Parcel Card */
+.parcel-card {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+}
+
+/* Sharp text styles for all cards */
+.parcel-card h2,
+.parcel-card .detail-label,
+.parcel-card .detail-value {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Text styles for bright backgrounds */
+.parcel-card[style*="FFD700"],  /* Yellow/Industrial */
+.parcel-card[style*="00FF00"] { /* Green/Commercial */
+    & h2,
+    & .detail-value {
+        color: #000000;
+        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    
+    & .detail-label {
+        color: rgba(0, 0, 0, 0.85);
+    }
+    
+    & .parcel-detail {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Darker background text styles */
+.parcel-card[style*="0066FF"], /* Blue/Residential */
+.parcel-card[style*="FF4500"], /* Orange/Mixed Use */
+.parcel-card[style*="9933CC"] { /* Purple/Legendary */
+    & h2,
+    & .detail-value {
+        color: #FFFFFF;
+    }
+    
+    & .detail-label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    & .parcel-detail {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+}
+
+.parcel-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.parcel-card h2 {
+    margin: 0 0 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+    color: #ffffff;
+    font-size: 24px;
+}
+
+/* Card Details */
+.parcel-detail {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 6px;
+}
+
+.parcel-detail:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #909090;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-value {
+    font-size: 13px;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* Icons */
+.icon {
+    font-size: 1.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+}
+
+.detail-label .icon:has(💎),
+.detail-label .icon:has(🏆) {
+    font-size: 1.4em;
+}
+
+/* Legend */
+.icon-legend {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0 auto 20px;
+    max-width: 1200px;
+}
+
+.legend-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.legend-section {
+    min-width: 200px;
+    flex: 1;
+}
+
+.legend-section h4 {
+    color: #909090;
+    font-size: 14px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+}
+
+/* Legend Items */
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-right: 8px;
+    color: white;
+    cursor: default;
+    user-select: none;
+    opacity: 1;
+}
+
+.legend-icon {
+    font-size: 1.2em;
+    width: 30px;
+    text-align: center;
+}
+
+.legend-text {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+/* Error Message */
+.error-message {
+    background: rgba(255, 68, 68, 0.1);
+    border-left: 4px solid #ff4444;
+    color: #ff4444;
+    padding: 15px 20px;
+    border-radius: 6px;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .results-container {
+        grid-template-columns: repeat(2, minmax(300px, 1fr));
+        padding: 16px;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .results-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .results-container {
+        grid-template-columns: 1fr;
+        padding: 10px;
+        gap: 20px;
+    }
+    
+    .parcel-card {
+        max-width: 100%;
+    }
+}
+
+/* Card Header */
+.card-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.card-header h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* Zone Icon */
+.zone-icon {
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    cursor: help;
+}
+
+.zone-icon:has(💎),
+.zone-icon:has(🏆) {
+    font-size: 2em;
+}
+
+.zone-icon:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+}
+
+.zoning-legend {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 20px auto;
+    max-width: 1200px;
+    width: auto;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.legend-title {
+    color: #909090;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    padding-right: 20px;
+    border-right: 1px solid #333;
+}
+
+/* Legend Items Colors */
+.legend-item[data-zone="Legendary"] {
+    background-color: #9933CC99;
+}
+
+.legend-item[data-zone="Mixed Use"] {
+    background-color: #FF450099;
+}
+
+.legend-item[data-zone="Residential"] {
+    background-color: #0066FF99;
+}
+
+.legend-item[data-zone="Commercial"] {
+    background-color: #00FF0099;
+}
+
+.legend-item[data-zone="Industrial"] {
+    background-color: #FFD70099;
+}
+
+.legend-item[data-zone="Commercial"] .legend-text,
+.legend-item[data-zone="Industrial"] .legend-text {
+    color: #000000;
+}
+
+/* Hero Image */
+.hero-image {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+    position: relative;
+    z-index: 2;
+    padding: 20px;
+}
+
+/* Search Container and Legend */
+.search-container {
+    max-width: 1200px;
+    margin: 0 auto 30px;
+    display: flex;
+    gap: 10px;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Filter Styles */
+.filter-dropdown-container {
+    position: relative;
+    min-width: 200px;
+}
+
+.filter-button {
+    background: rgba(30, 30, 30, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    position: relative;
+}
+
+.filter-button:after {
+    content: '▼';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+}
+
+.filter-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: rgba(30, 30, 30, 0.95);
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 8px 0;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 200px;
+    margin-top: 4px;
+    display: none;
+}
+
+/* Loading Spinner */
+.scroll-sentinel {
+    height: 20px;
+    margin: 20px 0;
+    text-align: center;
+    color: #909090;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #333;
+    border-top: 3px solid #0066FF;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card Actions */
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.download-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    color: inherit;
+}
+
+.download-btn:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Typewriter base styles (desktop) */
+.typewriter-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 300px;
+    display: block; /* Explicitly show on desktop */
+}
+
+.typewriter {
+    background: rgba(0, 0, 0, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    color: #00ff00 !important;
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.15);
+    position: relative;
+}
+
+.typewriter-content {
+    white-space: pre-wrap;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.typewriter-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: 1px solid #00ff00;
+    border-radius: 4px;
+    color: #00ff00;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    z-index: 1001;
+}
+
+.typewriter-close::before {
+    content: '×';
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .typewriter-container {
+        display: none !important; /* Force hide on mobile */
+    }
+}
+
+/* Hide styles */
+.typewriter-container.hidden {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+    /* Search container improvements */
+    .search-container {
+        flex-direction: column;
+        padding: 15px;
+        margin: 10px;
+    }
+
+    #searchInput {
+        width: 100%;
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+
+    #searchButton {
+        width: 100%;
+        padding: 10px;
+    }
+
+    /* Legend improvements */
+    .zoning-legend {
+        background: rgba(0, 0, 0, 0.9);
+        margin: 10px;
+        padding: 12px;
+    }
+
+    .legend-items {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .legend-item {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .legend-icon {
+        font-size: 16px;
+    }
+
+    /* Parcel card improvements */
+    .parcel-card {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .card-header h2 {
+        font-size: 18px;
+    }
+
+    /* Typewriter improvements */
+    .typewriter-container {
+        bottom: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+        max-width: none;
+    }
+
+    .typewriter {
+        padding: 15px;
+        font-size: 11px;
+    }
+
+    .typewriter-close {
+        top: 5px;
+        right: 5px;
+        width: 28px;
+        height: 28px;
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid #00ff00;
+        color: #00ff00;
+        font-size: 20px;
+    }
+
+    /* Filter improvements */
+    .filter-dropdown-container {
+        width: 100%;
+    }
+
+    .filter-menu {
+        width: 100%;
+        max-height: 300px;
+    }
+}
+
+/* Even smaller screens */
+@media (max-width: 380px) {
+    .legend-items {
+        grid-template-columns: 1fr;
+    }
+}
