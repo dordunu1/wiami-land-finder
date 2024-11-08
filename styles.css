@@ -5,6 +5,8 @@ body {
     font-family: Arial, sans-serif;
     padding: 0;
     line-height: 1.6;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
 }
 
 /* Search Container */
@@ -850,4 +852,10 @@ body {
     .analytics-button {
         width: 160px;
     }
+}
+
+/* Fix for iOS input styling */
+input, button {
+    -webkit-appearance: none;
+    border-radius: 0;
 }

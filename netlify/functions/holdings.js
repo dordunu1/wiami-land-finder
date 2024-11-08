@@ -3,15 +3,18 @@ import BlockchainAPI from '../../blockchain/api.js';
 export const handler = async (event) => {
     const address = event.path.split('/').pop();
     
+    const headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Content-Type': 'application/json'
+    };
+    
     try {
         const nfts = await BlockchainAPI.getAddressHoldings(address);
         
         return {
             statusCode: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            headers,
             body: JSON.stringify({
                 success: true,
                 nfts: nfts.ownedNfts || [],
@@ -24,10 +27,7 @@ export const handler = async (event) => {
         
         return {
             statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            headers,
             body: JSON.stringify({
                 success: false,
                 error: error.message || 'Unknown error occurred',
