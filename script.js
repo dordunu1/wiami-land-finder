@@ -1,3 +1,15 @@
+function getApiUrl(address) {
+    // Check if running locally
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1';
+    
+    if (isLocal) {
+        return `http://localhost:3001/api/holdings/${address}`;
+    } else {
+        return `/api/holdings/${address}`;
+    }
+}
+
 // Constants
 const ZONE_COLORS = {
     'RESIDENTIAL': '#0066FF',
@@ -10,7 +22,7 @@ const ZONE_COLORS = {
 const RANK_ICON = '⭐';
 const NEIGHBORHOOD_ICON = '📍';
 const VIDEO_ICON = '🎥';
-const PARCELS_PER_PAGE = 4444;
+const PARCELS_PER_PAGE = 1500;
 
 // Global state
 let currentPage = 0;
@@ -39,6 +51,8 @@ const FILTER_OPTIONS = {
     'Distance to Ocean': ['Close', 'Medium', 'Far'],
     'Distance to Bay': ['Close', 'Medium', 'Far']
 };
+
+const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
 function getZoningIcon(zoning) {
     switch(zoning.toUpperCase()) {
@@ -295,6 +309,39 @@ function generateParcelCard(parcel) {
     `;
 }
 
+function generateExpandedView(parcel, holdingsData = null) {
+    return `
+        <div class="expanded-card">
+            <div class="expanded-header">
+                <h2>${parcel.NAME}</h2>
+                <button class="close-expanded">×</button>
+            </div>
+            <div class="expanded-content">
+                <div class="parcel-details">
+                    <div class="basic-info">
+                        <p>Neighborhood: ${NEIGHBORHOOD_ICON} ${parcel.NEIGHBORHOOD}</p>
+                        <p>Zoning: ${getZoningIcon(parcel.ZONING)} ${parcel.ZONING}</p>
+                        <p>Plot Size: ${parcel.PLOT_SIZE}</p>
+                        <p>Building Size: ${parcel.BUILDING_SIZE}</p>
+                    </div>
+                    
+                    ${holdingsData ? `
+                        <div class="blockchain-data">
+                            <h3>Blockchain Details</h3>
+                            <p>Token ID: ${holdingsData.tokenId}</p>
+                            <p>Last Updated: ${new Date(holdingsData.timeLastUpdated).toLocaleDateString()}</p>
+                            <p>Balance: ${holdingsData.balance}</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="chart-container">
+                        <!-- Add chart here using Chart.js or similar -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
 
 
 function loadMoreParcels(reset = false) {
@@ -332,20 +379,107 @@ function displayParcelDetails(parcels, append = false) {
 }
 
 function handleDownload(parcelData) {
-    const parcel = JSON.parse(atob(parcelData));
-    const content = Object.entries(parcel)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('\n');
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Plot-${parcel.NAME}-Details.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    try {
+        const parcel = JSON.parse(atob(parcelData));
+        const parcelCard = document.querySelector(`.parcel-card[data-plot-id="${parcel.NAME}"]`);
+        
+        if (!parcelCard) {
+            showToast('Error: Could not find parcel card');
+            return;
+        }
+
+        // Store references to the buttons and text elements
+        const videoBtn = parcelCard.querySelector('.video-btn');
+        const downloadBtn = parcelCard.querySelector('.download-btn');
+        const textElements = parcelCard.querySelectorAll('.detail-label, .detail-value');
+        const originalColors = new Map();
+
+        // Store original colors and set text to white
+        textElements.forEach(el => {
+            originalColors.set(el, el.style.color);
+            el.style.color = '#FFFFFF';
+        });
+        
+        // Temporarily hide the buttons
+        if (videoBtn) videoBtn.style.display = 'none';
+        if (downloadBtn) downloadBtn.style.display = 'none';
+
+        // First capture the parcel card
+        html2canvas(parcelCard, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            backgroundColor: null
+        }).then(async cardCanvas => {
+            // Create a new canvas for the combined image
+            const finalCanvas = document.createElement('canvas');
+            const ctx = finalCanvas.getContext('2d');
+
+            // Load the Arweave image
+            const arweaveImage = new Image();
+            arweaveImage.crossOrigin = "anonymous";
+            arweaveImage.src = parcel.IMAGE_URL.replace('ar://', 'https://arweave.net/');
+
+            arweaveImage.onload = () => {
+                // Calculate dimensions to maintain aspect ratio of Arweave image
+                const cardHeight = cardCanvas.height;
+                const arweaveAspectRatio = arweaveImage.width / arweaveImage.height;
+                const arweaveWidth = cardHeight * arweaveAspectRatio;
+
+                // Set the canvas size
+                finalCanvas.width = cardCanvas.width + arweaveWidth;
+                finalCanvas.height = cardHeight;
+
+                // Draw the parcel card on the left
+                ctx.drawImage(cardCanvas, 0, 0);
+                
+                // Draw the Arweave image on the right, scaled to match card height
+                ctx.drawImage(arweaveImage, cardCanvas.width, 0, arweaveWidth, cardHeight);
+
+                // Create a blob from the canvas and download
+                finalCanvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.download = `Plot-${parcel.NAME}.png`;
+                    link.href = url;
+                    link.click();
+                    URL.revokeObjectURL(url);
+
+                    // Restore original colors
+                    textElements.forEach(el => {
+                        el.style.color = originalColors.get(el);
+                    });
+
+                    // Show the buttons again
+                    if (videoBtn) videoBtn.style.display = '';
+                    if (downloadBtn) downloadBtn.style.display = '';
+                }, 'image/png');
+            };
+
+            arweaveImage.onerror = () => {
+                // Restore everything on error
+                textElements.forEach(el => {
+                    el.style.color = originalColors.get(el);
+                });
+                if (videoBtn) videoBtn.style.display = '';
+                if (downloadBtn) downloadBtn.style.display = '';
+                console.error('Error loading Arweave image');
+                showToast('Error creating combined image');
+            };
+        }).catch(error => {
+            // Restore everything on error
+            textElements.forEach(el => {
+                el.style.color = originalColors.get(el);
+            });
+            if (videoBtn) videoBtn.style.display = '';
+            if (downloadBtn) downloadBtn.style.display = '';
+            console.error('Error capturing card:', error);
+            showToast('Error downloading image');
+        });
+    } catch (error) {
+        console.error('Error processing download:', error);
+        showToast('Error downloading image');
+    }
 }
 
 function populateFilterDropdown() {
@@ -465,6 +599,46 @@ function applyFilters() {
     loadMoreParcels(true);
 }
 
+// Add these new global variables
+let currentNFTPage = null;
+let isLoadingNFTs = false;
+let currentWalletAddress = null;
+
+async function fetchNFTPage(address, pageKey = null) {
+    let url = `https://eth-mainnet.g.alchemy.com/v2/eFm2JZg30eZjF6Ai0VGhqu4KyUEPkh--/getNFTs/?owner=${address}&contractAddresses[]=0xd396ca541F501F5D303166C509e2045848df356b&pageSize=100`;
+    if (pageKey) {
+        url += `&pageKey=${pageKey}`;
+    }
+    
+    const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+    
+    return response.json();
+}
+
+async function processNFTPage(nfts) {
+    const newParcels = [];
+    
+    for (const nft of nfts) {
+        const nftName = nft.title || nft.metadata?.name;
+        if (!nftName) continue;
+
+        const matchingParcels = allParcelsData.filter(parcel => {
+            if (!parcel?.NAME) return false;
+            const parcelName = parcel.NAME.toString().trim();
+            return parcelName === nftName;
+        });
+
+        newParcels.push(...matchingParcels);
+    }
+
+    return newParcels;
+}
+
 function setupInfiniteScroll() {
     const options = {
         root: null,
@@ -472,10 +646,29 @@ function setupInfiniteScroll() {
         threshold: 0.1
     };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+    const observer = new IntersectionObserver(async (entries) => {
+        entries.forEach(async (entry) => {
             if (entry.isIntersecting && !isLoading) {
-                loadMoreParcels();
+                if (currentWalletAddress && currentNFTPage && !isLoadingNFTs) {
+                    // Load more NFTs
+                    isLoadingNFTs = true;
+                    try {
+                        const pageData = await fetchNFTPage(currentWalletAddress, currentNFTPage);
+                        if (pageData.ownedNfts && pageData.ownedNfts.length > 0) {
+                            const newParcels = await processNFTPage(pageData.ownedNfts);
+                            filteredParcels = [...filteredParcels, ...newParcels];
+                            currentNFTPage = pageData.pageKey;
+                            loadMoreParcels();
+                        }
+                    } catch (error) {
+                        console.error('Error loading more NFTs:', error);
+                    } finally {
+                        isLoadingNFTs = false;
+                    }
+                } else {
+                    // Regular infinite scroll for non-wallet searches
+                    loadMoreParcels();
+                }
             }
         });
     }, options);
@@ -491,31 +684,147 @@ function showError(message) {
     detailsDiv.innerHTML = `<div class="error-message">${message}</div>`;
 }
 
+// Add this helper function for showing toast messages
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-message';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Remove toast after animation
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
 async function initialize() {
     try {
-        setupTypewriter();
+        console.log('Starting initialization...');
+        
+        // Load parcel data
         await loadParcelData();
+        
+        // Debug logs
+        console.log('All Parcels Data loaded:', allParcelsData.length, 'parcels');
+        console.log('Sample parcels:', allParcelsData.slice(0, 3).map(p => ({
+            name: p.NAME,
+            neighborhood: p.NEIGHBORHOOD,
+            zoning: p.ZONING
+        })));
+
+        setupTypewriter();
         setupInfiniteScroll();
         populateFilterDropdown();
 
         const searchButton = document.getElementById('searchButton');
         const searchInput = document.getElementById('searchInput');
 
-        searchButton.addEventListener('click', () => {
-            const searchTerms = searchInput.value.trim().toUpperCase().split(/[\s,]+/);
+        searchButton.addEventListener('click', async () => {
+            const searchValue = searchInput.value.trim();
             
-            if (!searchTerms[0]) {
-                filteredParcels = [...allParcelsData];
-            } else {
-                filteredParcels = searchTerms
-                    .map(term => {
-                        const cleanTerm = term.replace(/\s+/g, '-');
-                        return allParcelsData.find(p => p && p.NAME && 
-                            p.NAME.toString().toUpperCase() === cleanTerm);
-                    })
-                    .filter(Boolean);
+            // Clear all previous results first
+            const existingSearchResults = document.getElementById('searchResults');
+            if (existingSearchResults) {
+                existingSearchResults.remove();
             }
-            loadMoreParcels(true);
+            
+            const detailsDiv = document.getElementById('parcelDetails');
+            detailsDiv.innerHTML = ''; // Clear parcel details
+            
+            // Reset global states
+            currentNFTPage = null;
+            isLoadingNFTs = false;
+            filteredParcels = [];
+            
+            if (ETH_ADDRESS_REGEX.test(searchValue)) {
+                // Create new search results container
+                const searchResults = document.createElement('div');
+                searchResults.id = 'searchResults';
+                detailsDiv.parentNode.insertBefore(searchResults, detailsDiv);
+                
+                try {
+                    console.log('Search initiated for ETH address:', searchValue);
+                    const pageData = await fetchNFTPage(searchValue);
+                    
+                    if (!pageData.ownedNfts || pageData.ownedNfts.length === 0) {
+                        showError('No NFTs found for this address');
+                        return;
+                    }
+
+                    // Add NFT count to searchResults
+                    const countDiv = document.createElement('div');
+                    countDiv.className = 'nft-count';
+                    countDiv.textContent = `Found ${pageData.totalCount} NFTs`;
+                    searchResults.appendChild(countDiv);
+
+                    // Create analytics button
+                    const analyticsBtn = document.createElement('button');
+                    analyticsBtn.className = 'analytics-button';
+                    analyticsBtn.innerHTML = '📊 View Holdings Analysis';
+                    
+                    analyticsBtn.onclick = () => {
+                        try {
+                            const holdingsByZone = filteredParcels.reduce((acc, parcel) => {
+                                const zone = parcel.ZONING;
+                                acc[zone] = (acc[zone] || 0) + 1;
+                                return acc;
+                            }, {});
+
+                            const analyticsHTML = `
+                                <div class="analytics-container">
+                                    <h3>Holdings Analysis</h3>
+                                    <div class="total-nfts">
+                                        <h4>Total NFTs: ${pageData.totalCount}</h4>
+                                    </div>
+                                    <div class="zone-distribution">
+                                        ${Object.entries(holdingsByZone)
+                                            .map(([zone, count]) => `
+                                                <div class="zone-stat">
+                                                    <span>${getZoningIcon(zone)} ${zone}</span>
+                                                    <span>${count}</span>
+                                                </div>
+                                            `).join('')}
+                                    </div>
+                                </div>
+                            `;
+
+                            searchResults.innerHTML = analyticsHTML;
+                        } catch (error) {
+                            console.error('Analytics error:', error);
+                            showError('Failed to generate analytics');
+                        }
+                    };
+
+                    // Add analytics button to searchResults
+                    searchResults.appendChild(analyticsBtn);
+
+                    // Process NFTs and update display
+                    const initialParcels = await processNFTPage(pageData.ownedNfts);
+                    filteredParcels = initialParcels;
+                    currentNFTPage = pageData.pageKey;
+                    currentWalletAddress = searchValue; // Update current wallet address
+                    loadMoreParcels(true);
+                    
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showError(`Failed to fetch wallet holdings: ${error.message}`);
+                }
+            } else {
+                // Existing Plot ID search logic remains unchanged
+                const searchTerms = searchValue.toUpperCase().split(/[\s,]+/);
+                if (!searchTerms[0]) {
+                    filteredParcels = [...allParcelsData];
+                } else {
+                    filteredParcels = searchTerms
+                        .map(term => {
+                            const cleanTerm = term.replace(/\s+/g, '-');
+                            return allParcelsData.find(p => p && p.NAME && 
+                                p.NAME.toString().toUpperCase() === cleanTerm);
+                        })
+                        .filter(Boolean);
+                }
+                loadMoreParcels(true);
+            }
         });
 
         searchInput.addEventListener('keypress', (e) => {

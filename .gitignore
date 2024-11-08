@@ -1,0 +1,22 @@
+# Node
+node_modules/
+package-lock.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# System
+.DS_Store
+
+# Netlify
+.netlify/
+dist/
+
+# Old server file
+server.js
+
+# IDE
+.vscode/
+.idea/
