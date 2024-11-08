@@ -66,16 +66,16 @@ function getZoningIcon(zoning) {
 }
 
 function setupTypewriter() {
-    const content = `Wiami Urban Planning
-Plot Search
+    const content = `# Wiami Urban Planning Plot Search(UNOFFICIAL)
+https://unofficialfinder.netlify.app/
 
 Core Features:
 • Official XLSX Rankings Integration
 • Interactive Hologram Plot Images
-• Search plots by ID
+• Search by Plot ID or ETH Address
 • Multi-Filter System
 • Real-time filtering
-• Dynamic loading (20 plots/page)
+• Dynamic loading
 • Color-coded zoning types
 • Plot video previews
 • Downloadable plot data
@@ -91,18 +91,38 @@ Data Sources:
 • Rankings: Official XLSX File
 • Media: JSON Metadata & Arweave Images
 • Plot Details: Merged Data
+• Blockchain: Ethereum LAND NFT Holdings
 
 Special Features:
 • 🎥 Video Preview
-• 💾 Download Details
-• 🌟 Hover for 3D Hologram View
+• 💾 Download Plot Details
+• ⭐ Hover for 3D Hologram View
+• 📊 Holdings Analysis Dashboard
+• 📸 Plot Card Image Export
+• 📈 Real-time Holdings Statistics
+
+Advanced Features:
+• Wallet Holdings Analysis
+  - Total NFT Count
+  - Distribution by Zone
+  - Holdings Visualization
+• Plot Card Export
+  - High-resolution Image
+  - Combined Plot & Details View
+  - One-click Download
+  - Wallet Address Search
 
 Instructions:
-1. Use the search bar to find specific plots
-2. Apply filters to narrow down results
-3. Hover over plots to see hologram effect
-4. Click 🎥 to view plot video
-5. Click 💾 to download plot details`;
+1. Search by:
+   - Plot ID for specific plots
+   - ETH address for wallet holdings
+2. Apply filters to narrow results
+3. Hover over plots for hologram effect
+4. Use function buttons:
+   - 🎥 View plot video
+   - 💾 Download plot details
+   - 📊 View holdings analysis
+   - 📸 Export plot card`;
 
     const typewriterContainer = document.createElement('div');
     typewriterContainer.className = 'typewriter-container';
