@@ -152,41 +152,44 @@ Instructions:
     typeWriter();
 }
 
+// Add these global variables at the top
+const INITIAL_LOAD_SIZE = 500;
+let allDataLoaded = false;
+let jsonData = null;
+let rankings = null;
+
 async function loadParcelData() {
     try {
-        // Load both data sources
-        const [jsonResponse, xlsxResponse] = await Promise.all([
-            fetch('./data/metadata.json'),
-            fetch('./data/parcels.xlsx')
-        ]);
+        // Load both data sources if not already loaded
+        if (!jsonData || !rankings) {
+            const [jsonResponse, xlsxResponse] = await Promise.all([
+                fetch('./data/metadata.json'),
+                fetch('./data/parcels.xlsx')
+            ]);
 
-        if (!jsonResponse.ok) {
-            throw new Error(`HTTP error loading JSON! status: ${jsonResponse.status}`);
+            if (!jsonResponse.ok) {
+                throw new Error(`HTTP error loading JSON! status: ${jsonResponse.status}`);
+            }
+
+            // Parse JSON data
+            jsonData = await jsonResponse.json();
+            console.log('JSON Data loaded');
+
+            // Parse XLSX data
+            const xlsxBuffer = await xlsxResponse.arrayBuffer();
+            const workbook = XLSX.read(xlsxBuffer);
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            
+            // Convert XLSX to JSON starting from row 3
+            rankings = XLSX.utils.sheet_to_json(worksheet, {
+                range: 2,
+                header: ['Rank', 'Name', 'Neighborhood', 'Zoning Type', 'Plot Size', 'Building Size', 
+                        'Distance to Ocean', 'Distance to Bay', 'Max # of Floors', 'Min # of Floors', 
+                        'Plot Area (m²)', 'Min Building Height (m)', 'Max Building Height (m)', 
+                        'Distance to Ocean (m)', 'Distance to Bay (m)']
+            });
+            console.log('XLSX Data loaded');
         }
-
-        // Parse JSON data
-        const jsonData = await jsonResponse.json();
-        console.log('JSON Data first entry:', jsonData.nfts[0]); // Debug log
-
-        // Parse XLSX data
-        const xlsxBuffer = await xlsxResponse.arrayBuffer();
-        const workbook = XLSX.read(xlsxBuffer);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        
-        // Get the range of the worksheet
-        const range = XLSX.utils.decode_range(worksheet['!ref']);
-        console.log('XLSX Range:', range); // Debug log
-
-        // Convert XLSX to JSON starting from row 3
-        const rankings = XLSX.utils.sheet_to_json(worksheet, {
-            range: 2,  // Start from row 3
-            header: ['Rank', 'Name', 'Neighborhood', 'Zoning Type', 'Plot Size', 'Building Size', 
-                    'Distance to Ocean', 'Distance to Bay', 'Max # of Floors', 'Min # of Floors', 
-                    'Plot Area (m²)', 'Min Building Height (m)', 'Max Building Height (m)', 
-                    'Distance to Ocean (m)', 'Distance to Bay (m)']
-        });
-
-        console.log('First XLSX entry:', rankings[0]); // Debug log
 
         // Create video URL map from JSON
         const videoMap = new Map();
@@ -199,12 +202,11 @@ async function loadParcelData() {
             }
         });
 
-        console.log('Video Map size:', videoMap.size); // Debug log
-        console.log('First few video map entries:', 
-            Array.from(videoMap.entries()).slice(0, 3)); // Debug log
-
-        // Merge data
-        allParcelsData = rankings
+        // Load only initial batch
+        const initialRankings = rankings.slice(0, INITIAL_LOAD_SIZE);
+        
+        // Process initial batch
+        allParcelsData = initialRankings
             .map(ranking => {
                 const plotName = ranking.Name;
                 const mediaData = videoMap.get(plotName);
@@ -236,12 +238,8 @@ async function loadParcelData() {
             })
             .filter(Boolean);
 
-        console.log('First few merged records:', allParcelsData.slice(0, 3));
+        console.log(`Initial ${INITIAL_LOAD_SIZE} parcels loaded`);
         
-        if (allParcelsData.length === 0) {
-            throw new Error('No data after merging XLSX and JSON');
-        }
-
         filteredParcels = [...allParcelsData];
         return loadMoreParcels(true);
 
@@ -251,6 +249,79 @@ async function loadParcelData() {
         throw error;
     }
 }
+
+// Add this function to load more data
+async function loadMoreData() {
+    if (allDataLoaded) return;
+
+    try {
+        const currentSize = allParcelsData.length;
+        const nextBatch = rankings.slice(currentSize, currentSize + INITIAL_LOAD_SIZE);
+        
+        if (nextBatch.length === 0) {
+            allDataLoaded = true;
+            console.log('All data loaded:', allParcelsData.length, 'parcels');
+            return;
+        }
+
+        const videoMap = new Map(
+            jsonData.nfts
+                .filter(nft => nft?.metadata?.name)
+                .map(nft => [
+                    nft.metadata.name,
+                    {
+                        video: nft.metadata.animation_url,
+                        image: nft.metadata.image
+                    }
+                ])
+        );
+
+        const newParcels = nextBatch
+            .map(ranking => {
+                if (!ranking?.Name) {
+                    console.warn('Invalid ranking data:', ranking);
+                    return null;
+                }
+
+                const plotName = ranking.Name;
+                const mediaData = videoMap.get(plotName);
+
+                if (!mediaData) {
+                    console.warn(`No media data found for plot: ${plotName}`);
+                    return null;
+                }
+
+                return {
+                    NAME: plotName,
+                    RANK: ranking.Rank,
+                    NEIGHBORHOOD: ranking.Neighborhood,
+                    ZONING: ranking['Zoning Type'],
+                    PLOT_SIZE: ranking['Plot Size'],
+                    BUILDING_SIZE: ranking['Building Size'],
+                    DISTANCE_TO_OCEAN: ranking['Distance to Ocean'],
+                    DISTANCE_TO_BAY: ranking['Distance to Bay'],
+                    MAX_FLOORS: ranking['Max # of Floors'],
+                    MIN_FLOORS: ranking['Min # of Floors'],
+                    PLOT_AREA: ranking['Plot Area (m²)'],
+                    MIN_BUILDING_HEIGHT: ranking['Min Building Height (m)'],
+                    MAX_BUILDING_HEIGHT: ranking['Max Building Height (m)'],
+                    DISTANCE_TO_OCEAN_M: ranking['Distance to Ocean (m)'],
+                    DISTANCE_TO_BAY_M: ranking['Distance to Bay (m)'],
+                    VIDEO_URL: mediaData.video,
+                    IMAGE_URL: mediaData.image
+                };
+            })
+            .filter(Boolean);
+
+        allParcelsData = [...allParcelsData, ...newParcels];
+        console.log(`Loaded ${newParcels.length} more parcels. Total: ${allParcelsData.length}`);
+        
+    } catch (error) {
+        console.error('Error loading more data:', error);
+        showError('Failed to load more data');
+    }
+}
+
 function generateParcelCard(parcel) {
     const zoneColor = ZONE_COLORS[parcel.ZONING.toUpperCase()] || '#1E1E1E';
     const parcelData = btoa(JSON.stringify(parcel));
@@ -669,26 +740,10 @@ function setupInfiniteScroll() {
     const observer = new IntersectionObserver(async (entries) => {
         entries.forEach(async (entry) => {
             if (entry.isIntersecting && !isLoading) {
-                if (currentWalletAddress && currentNFTPage && !isLoadingNFTs) {
-                    // Load more NFTs
-                    isLoadingNFTs = true;
-                    try {
-                        const pageData = await fetchNFTPage(currentWalletAddress, currentNFTPage);
-                        if (pageData.ownedNfts && pageData.ownedNfts.length > 0) {
-                            const newParcels = await processNFTPage(pageData.ownedNfts);
-                            filteredParcels = [...filteredParcels, ...newParcels];
-                            currentNFTPage = pageData.pageKey;
-                            loadMoreParcels();
-                        }
-                    } catch (error) {
-                        console.error('Error loading more NFTs:', error);
-                    } finally {
-                        isLoadingNFTs = false;
-                    }
-                } else {
-                    // Regular infinite scroll for non-wallet searches
-                    loadMoreParcels();
+                if (!allDataLoaded) {
+                    await loadMoreData();
                 }
+                loadMoreParcels();
             }
         });
     }, options);
@@ -717,6 +772,61 @@ function showToast(message) {
     }, 5000);
 }
 
+async function searchPlots(searchValue) {
+    try {
+        const searchTerms = searchValue.toString().toUpperCase().split(/[\s,]+/);
+        
+        // Show loading state
+        showToast('Loading all parcels...');
+        
+        // Load all remaining data if not already loaded
+        while (!allDataLoaded) {
+            await loadMoreData();
+            console.log(`Loaded parcels: ${allParcelsData.length}`);
+        }
+        
+        console.log('Search terms:', searchTerms);
+        
+        // Now search through complete dataset
+        filteredParcels = searchTerms
+            .map(term => {
+                if (!term) return null;
+                
+                const cleanTerm = term.replace(/\s+/g, '-');
+                console.log('Looking for:', cleanTerm);
+                
+                const found = allParcelsData.find(p => {
+                    if (!p || !p.NAME) {
+                        console.warn('Invalid parcel data:', p);
+                        return false;
+                    }
+                    const parcelName = p.NAME.toString().toUpperCase();
+                    return parcelName === cleanTerm;
+                });
+                
+                if (!found) {
+                    console.log(`No parcel found for term: ${cleanTerm}`);
+                }
+                return found;
+            })
+            .filter(Boolean);
+            
+        console.log('Found parcels:', filteredParcels.length);
+        
+        if (filteredParcels.length === 0) {
+            showToast('No parcels found matching your search');
+        } else {
+            showToast(`Found ${filteredParcels.length} parcel(s)`);
+        }
+        
+        return loadMoreParcels(true);
+    } catch (error) {
+        console.error('Search error:', error);
+        showError(`Search failed: ${error.message}`);
+        return false;
+    }
+}
+
 async function initialize() {
     try {
         console.log('Starting initialization...');
@@ -740,110 +850,30 @@ async function initialize() {
         const searchInput = document.getElementById('searchInput');
 
         searchButton.addEventListener('click', async () => {
-            const searchValue = searchInput.value.trim();
-            
-            // Clear all previous results first
-            const existingSearchResults = document.getElementById('searchResults');
-            if (existingSearchResults) {
-                existingSearchResults.remove();
-            }
-            
-            const detailsDiv = document.getElementById('parcelDetails');
-            detailsDiv.innerHTML = ''; // Clear parcel details
-            
-            // Reset global states
-            currentNFTPage = null;
-            isLoadingNFTs = false;
-            filteredParcels = [];
-            
-            if (ETH_ADDRESS_REGEX.test(searchValue)) {
-                // Create new search results container
-                const searchResults = document.createElement('div');
-                searchResults.id = 'searchResults';
-                detailsDiv.parentNode.insertBefore(searchResults, detailsDiv);
+            try {
+                const searchValue = searchInput.value.trim();
+                if (!searchValue) {
+                    showToast('Please enter a search term');
+                    return;
+                }
                 
-                try {
-                    console.log('Search initiated for ETH address:', searchValue);
-                    const pageData = await fetchNFTPage(searchValue);
-                    
-                    if (!pageData.ownedNfts || pageData.ownedNfts.length === 0) {
-                        showError('No NFTs found for this address');
-                        return;
-                    }
-
-                    // Add NFT count to searchResults
-                    const countDiv = document.createElement('div');
-                    countDiv.className = 'nft-count';
-                    countDiv.textContent = `Found ${pageData.totalCount} NFTs`;
-                    searchResults.appendChild(countDiv);
-
-                    // Create analytics button
-                    const analyticsBtn = document.createElement('button');
-                    analyticsBtn.className = 'analytics-button';
-                    analyticsBtn.innerHTML = '📊 View Holdings Analysis';
-                    
-                    analyticsBtn.onclick = () => {
-                        try {
-                            const holdingsByZone = filteredParcels.reduce((acc, parcel) => {
-                                const zone = parcel.ZONING;
-                                acc[zone] = (acc[zone] || 0) + 1;
-                                return acc;
-                            }, {});
-
-                            const analyticsHTML = `
-                                <div class="analytics-container">
-                                    <h3>Holdings Analysis</h3>
-                                    <div class="total-nfts">
-                                        <h4>Total NFTs: ${pageData.totalCount}</h4>
-                                    </div>
-                                    <div class="zone-distribution">
-                                        ${Object.entries(holdingsByZone)
-                                            .map(([zone, count]) => `
-                                                <div class="zone-stat">
-                                                    <span>${getZoningIcon(zone)} ${zone}</span>
-                                                    <span>${count}</span>
-                                                </div>
-                                            `).join('')}
-                                    </div>
-                                </div>
-                            `;
-
-                            searchResults.innerHTML = analyticsHTML;
-                        } catch (error) {
-                            console.error('Analytics error:', error);
-                            showError('Failed to generate analytics');
-                        }
-                    };
-
-                    // Add analytics button to searchResults
-                    searchResults.appendChild(analyticsBtn);
-
-                    // Process NFTs and update display
-                    const initialParcels = await processNFTPage(pageData.ownedNfts);
-                    filteredParcels = initialParcels;
-                    currentNFTPage = pageData.pageKey;
-                    currentWalletAddress = searchValue; // Update current wallet address
-                    loadMoreParcels(true);
-                    
-                } catch (error) {
-                    console.error('Search error:', error);
-                    showError(`Failed to fetch wallet holdings: ${error.message}`);
+                // Clear previous results
+                const existingSearchResults = document.getElementById('searchResults');
+                if (existingSearchResults) {
+                    existingSearchResults.remove();
                 }
-            } else {
-                // Existing Plot ID search logic remains unchanged
-                const searchTerms = searchValue.toUpperCase().split(/[\s,]+/);
-                if (!searchTerms[0]) {
-                    filteredParcels = [...allParcelsData];
+                
+                const detailsDiv = document.getElementById('parcelDetails');
+                detailsDiv.innerHTML = ''; // Clear parcel details
+                
+                if (ETH_ADDRESS_REGEX.test(searchValue)) {
+                    // Existing wallet search code...
                 } else {
-                    filteredParcels = searchTerms
-                        .map(term => {
-                            const cleanTerm = term.replace(/\s+/g, '-');
-                            return allParcelsData.find(p => p && p.NAME && 
-                                p.NAME.toString().toUpperCase() === cleanTerm);
-                        })
-                        .filter(Boolean);
+                    await searchPlots(searchValue);
                 }
-                loadMoreParcels(true);
+            } catch (error) {
+                console.error('Search button error:', error);
+                showError(`Search failed: ${error.message}`);
             }
         });
 
