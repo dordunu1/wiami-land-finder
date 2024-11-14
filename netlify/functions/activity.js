@@ -1,5 +1,5 @@
 import { Alchemy, Network } from "alchemy-sdk";
-import { ActivityAPI } from '../../js/activityApi.js';
+import { ActivityAPI } from './activityApi.js';  // Import from local copy
 
 export const handler = async (event) => {
     try {
@@ -7,7 +7,7 @@ export const handler = async (event) => {
             console.log('Activity request received');
             
             const body = JSON.parse(event.body || '{}');
-            const pageKey = body.pageKey; // Get pageKey from request
+            const pageKey = body.pageKey;
             
             const result = await ActivityAPI.getRecentSales(50, pageKey);
             
