@@ -2,59 +2,19 @@ import fs from 'fs';
 import path from 'path';
 import { createTraitCharts } from '../../blockchain/Charts';
 
-
-const METADATA_FILE = path.join(__dirname, 'data', 'metadata.json');
-const CACHE_FILE = path.join(__dirname, '.cache', 'analytics.json');
-const CACHE_DURATION = 3600 * 1000;
-// Helper function to add delay between requests
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-async function getCachedData() {
-    try {
-        if (fs.existsSync(CACHE_FILE)) {
-            const data = JSON.parse(fs.readFileSync(CACHE_FILE));
-            
-            // Add metadata about data completeness
-            return {
-                ...data.analytics,
-                metadata: {
-                    isPartialData: data.analytics.collection.processedNFTs < 4444,
-                    processedCount: data.analytics.collection.processedNFTs,
-                    totalExpected: 4444,
-                    lastUpdated: new Date(data.timestamp).toISOString(),
-                    completionPercentage: ((data.analytics.collection.processedNFTs / 4444) * 100).toFixed(1)
-                }
-            };
-        }
-    } catch (error) {
-        console.error("Cache read error:", error);
-    }
-    return null;
-}
-
-async function saveToCache(analytics, isComplete = false) {
-    try {
-        if (!fs.existsSync('.cache')) {
-            fs.mkdirSync('.cache');
-        }
-        fs.writeFileSync(CACHE_FILE, JSON.stringify({
-            timestamp: Date.now(),
-            analytics,
-            isComplete,
-            lastProcessedCount: analytics.collection.processedNFTs
-        }));
-    } catch (error) {
-        console.error("Cache write error:", error);
-    }
-}
-
 export async function handler(event, context) {
     try {
         console.log("1. Starting metadata processing...");
         
-        // Debug file path
-        console.log("Metadata file path:", METADATA_FILE);
-        console.log("File exists:", fs.existsSync(METADATA_FILE));
+        // Simplified path resolution
+        const METADATA_FILE = './netlify/functions/data/metadata.json';
+        
+        // Debug logging
+        console.log({
+            currentDir: process.cwd(),
+            metadataPath: METADATA_FILE,
+            exists: fs.existsSync(METADATA_FILE)
+        });
 
         // Read file contents
         const fileContents = fs.readFileSync(METADATA_FILE, 'utf8');
@@ -68,7 +28,6 @@ export async function handler(event, context) {
             console.log("Raw data keys:", Object.keys(rawData));
             console.log("NFTs array length:", rawData.nfts?.length);
             
-            // Log first NFT for debugging
             if (rawData.nfts?.[0]) {
                 console.log("First NFT structure:", JSON.stringify(rawData.nfts[0], null, 2));
             }
@@ -162,9 +121,6 @@ export async function handler(event, context) {
         };
 
         console.log("Generated analytics:", analytics);
-
-        // Save to cache
-        await saveToCache(analytics, true);
         
         // Create charts configuration
         const chartConfigs = createTraitCharts(analytics);
@@ -216,14 +172,12 @@ function calculatePercentages(traitCount, total) {
 }
 
 function calculateAverages(values) {
-    // Convert string values to numbers and filter out any non-numeric values
     const numbers = Object.entries(values)
         .map(([key, count]) => ({ value: parseFloat(key), count }))
         .filter(item => !isNaN(item.value));
 
     if (numbers.length === 0) return { min: 0, max: 0, avg: 0 };
     
-    // Calculate weighted average based on count
     const total = numbers.reduce((sum, item) => sum + (item.value * item.count), 0);
     const count = numbers.reduce((sum, item) => sum + item.count, 0);
     
@@ -233,4 +187,3 @@ function calculateAverages(values) {
         avg: (total / count).toFixed(2)
     };
 }
-
