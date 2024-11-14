@@ -1,8 +1,8 @@
 import { createTraitCharts } from '/blockchain/Charts.js';
 
 function getApiUrl(address) {
-    // When using Netlify Dev, always use the /.netlify/functions path
-    return `/.netlify/functions/holdings/${address}`;
+    // When using Netlify, use the correct path format
+    return `/.netlify/functions/analytics/${address}`;
 }
 
 // Constants
