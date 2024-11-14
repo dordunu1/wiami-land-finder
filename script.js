@@ -1,13 +1,8 @@
+import { createTraitCharts } from '/blockchain/Charts.js';
+
 function getApiUrl(address) {
-    // Check if running locally
-    const isLocal = window.location.hostname === 'localhost' || 
-                    window.location.hostname === '127.0.0.1';
-    
-    if (isLocal) {
-        return `http://localhost:3001/api/holdings/${address}`;
-    } else {
-        return `/api/holdings/${address}`;
-    }
+    // When using Netlify Dev, always use the /.netlify/functions path
+    return `/.netlify/functions/holdings/${address}`;
 }
 
 // Constants
@@ -66,63 +61,65 @@ function getZoningIcon(zoning) {
 }
 
 function setupTypewriter() {
-    const content = `# Wiami Urban Planning Plot Search(UNOFFICIAL)
+    const content = `# Wiami Urban Planning Plot Search (UNOFFICIAL)
 https://unofficialfinder.netlify.app/
 
 Core Features:
-• Official XLSX Rankings Integration
-• Interactive Hologram Plot Images
-• Search by Plot ID or ETH Address
-• Multi-Filter System
-• Real-time filtering
-• Dynamic loading
-• Color-coded zoning types
-• Plot video previews
-• Downloadable plot data
+• Search by Plot ID, ETH Address, or ENS Name
+• Interactive Plot Holograms & Video Previews
+• Multi-Filter System with Real-time Updates
+• Genesis Land Analytics & Statistics
+• Activity Tracking for Land Sales & Transfers
+• Holdings Analysis Dashboard
 
-Zoning Types:
-• Legendary 💎
-• Mixed Use 🏆
-• Residential 🏠
-• Commercial 🏢
-• Industrial 🏭
+Search Options:
+• Plot ID Search
+• ETH Address (0x...)
+• ENS Domain Names
+• Multi-Plot Search
 
-Data Sources:
-• Rankings: Official XLSX File
-• Media: JSON Metadata & Arweave Images
-• Plot Details: Merged Data
-• Blockchain: Ethereum LAND NFT Holdings
-
-Special Features:
-• 🎥 Video Preview
-• 💾 Download Plot Details
-• ⭐ Hover for 3D Hologram View
-• 📊 Holdings Analysis Dashboard
-• 📸 Plot Card Image Export
-• 📈 Real-time Holdings Statistics
-
-Advanced Features:
+Analytics & Data:
+• Genesis Land Distribution
+• Real-time Market Activity
 • Wallet Holdings Analysis
-  - Total NFT Count
-  - Distribution by Zone
-  - Holdings Visualization
-• Plot Card Export
-  - High-resolution Image
-  - Combined Plot & Details View
-  - One-click Download
-  - Wallet Address Search
+• Transfer History Tracking
+• Zone Distribution Stats
+• Plot Size Analytics
+
+Plot Features:
+• 🎥 Video Previews
+• 💾 Plot Data Export
+• ⭐ 3D Hologram View
+• 📊 Holdings Dashboard
+• 📸 Plot Card Export
+
+
+Recent Updates:
+• ENS Domain Search Support
+• Genesis Land Analytics
+• Activity Tab for Sales History
+• Address Holdings Dashboard
+• Transfer History Tracking
+• Real-time Market Data
 
 Instructions:
-1. Search by:
-   - Plot ID for specific plots
-   - ETH address for wallet holdings
-2. Apply filters to narrow results
-3. Hover over plots for hologram effect
-4. Use function buttons:
-   - 🎥 View plot video
-   - 💾 Download plot details
-   - 📊 View holdings analysis
-   - 📸 Export plot card`;
+1. Search using:
+   - Plot IDs
+   - ETH Address
+   - ENS Name
+2. Explore Analytics:
+   - Genesis Land Stats
+   - Market Activity
+   - Holdings Analysis
+3. View Plot Details:
+   - Hologram Preview
+   - Video 
+   - Download Data`;
+
+   // Add this at the top with your other constants
+    const analyticsBtn = document.getElementById('analytics-btn');
+    const mainAnalyticsContainer = document.getElementById('analytics-container');
+    const holdingsAnalyticsContainer = document.getElementById('holdings-analytics-container');
 
     const typewriterContainer = document.createElement('div');
     typewriterContainer.className = 'typewriter-container';
@@ -151,6 +148,27 @@ Instructions:
 
     typeWriter();
 }
+
+const ENS_REGEX = /^[a-zA-Z0-9-]+\.eth$/;
+
+async function resolveAddress(input) {
+    try {
+        if (ENS_REGEX.test(input)) {
+            const response = await fetch(`/.netlify/functions/resolveENS/${input}`);
+            const data = await response.json();
+            
+            if (!data.success || !data.address) {
+                throw new Error(data.error || 'Invalid ENS name');
+            }
+            return data.address;
+        }
+        return input;
+    } catch (error) {
+        console.error('ENS resolution error:', error);
+        throw new Error(`Failed to resolve ENS name: ${error.message}`);
+    }
+}
+
 
 async function loadParcelData() {
     try {
@@ -371,7 +389,14 @@ function loadMoreParcels(reset = false) {
     try {
         if (reset) {
             currentPage = 0;
-            document.getElementById('parcelDetails').innerHTML = '';
+            const parcelDetails = document.getElementById('parcelDetails');
+            parcelDetails.innerHTML = '';
+            
+            // Reset the container styles
+            parcelDetails.style.display = 'grid';
+            parcelDetails.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+            parcelDetails.style.gap = '20px';
+            parcelDetails.style.padding = '20px';
         }
 
         const start = currentPage * PARCELS_PER_PAGE;
@@ -717,6 +742,150 @@ function showToast(message) {
     }, 5000);
 }
 
+async function initializeAnalytics() {
+    const analyticsBtn = document.getElementById('analytics-btn');
+    const analyticsContainer = document.getElementById('analytics-container');
+    const searchResults = document.getElementById('parcelDetails');
+
+    if (!analyticsBtn || !analyticsContainer) return;
+
+    analyticsBtn.addEventListener('click', async () => {
+        try {
+            const parcelDetails = document.getElementById('parcelDetails');
+            const searchContainer = document.querySelector('.search-container');
+            const zoningLegend = document.querySelector('.zoning-legend');
+            const typewriterContainer = document.querySelector('.typewriter-container');
+            const foundCount = document.querySelector('.found-count');
+
+            // Toggle visibility
+            if (analyticsContainer.style.display === 'none') {
+                // Hide other elements
+                parcelDetails.style.display = 'none';
+                searchContainer.style.display = 'none';
+                zoningLegend.style.display = 'none';
+                if (typewriterContainer) typewriterContainer.style.display = 'none';
+                if (foundCount) foundCount.style.display = 'none';
+                searchResults.innerHTML = '';
+                analyticsContainer.style.display = 'block';
+
+                // Fetch analytics data
+                const response = await fetch('/.netlify/functions/analytics');
+                const responseData = await response.json();
+
+                // Check if the response has the expected structure
+                if (!responseData || !responseData.data) {
+                    throw new Error('Invalid response format');
+                }
+
+                // Create chart configs
+                const { renderCharts } = await import('/js/renderCharts.js');
+                const chartConfigs = createTraitCharts(responseData.data);
+
+                // Display analytics data and chart containers
+                analyticsContainer.innerHTML = `
+                    <button id="close-analytics" class="close-btn">×</button>
+                    <div class="analytics-content">
+                        <h2>WIAMI GENESIS LAND PARCELS Analytics</h2>
+                        <div class="chart-grid">
+                            <div id="neighborhood-chart"></div>
+                            <div id="zoning-chart"></div>
+                            <div id="plot-size-chart"></div>
+                            <div id="building-height-chart"></div>
+                            <div id="distance-ocean-chart"></div>
+                            <div id="distance-bay-chart"></div>
+                           <div id="numerical-traits-chart"></div>
+                        </div>
+                    </div>
+                `;
+
+                // Render the charts
+                renderCharts(chartConfigs);
+
+                // Add close button functionality
+                document.getElementById('close-analytics').addEventListener('click', () => {
+                    overlay.remove();
+                    
+                    // Clear search results and found count
+                    const searchResults = document.getElementById('searchResults');
+                    if (searchResults) searchResults.remove();
+                    
+                    const foundCount = document.querySelector('[class*="found"]');
+                    if (foundCount) foundCount.remove();
+                    
+                    // Reset filtered parcels to show all
+                    filteredParcels = [...allParcelsData];
+                    loadMoreParcels(true);
+                    
+                    // Show all UI elements
+                    const parcelDetails = document.getElementById('parcelDetails');
+                    const searchContainer = document.querySelector('.search-container');
+                    const zoningLegend = document.querySelector('.zoning-legend');
+                    const typewriterContainer = document.querySelector('.typewriter-container');
+                    
+                    if (parcelDetails) parcelDetails.style.display = 'block';
+                    if (searchContainer) searchContainer.style.display = 'flex';
+                    if (zoningLegend) zoningLegend.style.display = 'block';
+                    if (typewriterContainer) typewriterContainer.style.display = 'block';
+                });
+
+            } else {
+                // Hide analytics and show main content
+                analyticsContainer.style.display = 'none';
+                parcelDetails.style.display = 'block';
+                searchContainer.style.display = 'flex';
+                zoningLegend.style.display = 'block';
+                if (typewriterContainer) typewriterContainer.style.display = 'block';
+                if (foundCount) foundCount.style.display = 'block';
+            }
+
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+            analyticsContainer.innerHTML = `
+                <div class="error-message">
+                    <button id="close-analytics" class="close-btn">×</button>
+                    <p>Failed to load analytics. Please try again later.</p>
+                    <p class="error-details">${error.message}</p>
+                </div>
+            `;
+
+            // Add close button functionality for error state
+            document.getElementById('close-analytics').addEventListener('click', () => {
+                overlay.remove();
+                
+                // Clear search results and found count
+                const searchResults = document.getElementById('searchResults');
+                if (searchResults) searchResults.remove();
+                
+                const foundCount = document.querySelector('[class*="found"]');
+                if (foundCount) foundCount.remove();
+                
+                // Reset filtered parcels to show all
+                filteredParcels = [...allParcelsData];
+                loadMoreParcels(true);
+                
+                // Show all UI elements
+                const parcelDetails = document.getElementById('parcelDetails');
+                const searchContainer = document.querySelector('.search-container');
+                const zoningLegend = document.querySelector('.zoning-legend');
+                const typewriterContainer = document.querySelector('.typewriter-container');
+                
+                if (parcelDetails) parcelDetails.style.display = 'block';
+                if (searchContainer) searchContainer.style.display = 'flex';
+                if (zoningLegend) zoningLegend.style.display = 'block';
+                if (typewriterContainer) typewriterContainer.style.display = 'block';
+            });
+        }
+    });
+}
+
+// Add this function at the top level
+function toggleAnalyticsButton(show) {
+    const analyticsBtn = document.querySelector('.analytics-button');
+    if (analyticsBtn) {
+        analyticsBtn.style.display = show ? 'block' : 'none';
+    }
+}
+
 async function initialize() {
     try {
         console.log('Starting initialization...');
@@ -735,6 +904,7 @@ async function initialize() {
         setupTypewriter();
         setupInfiniteScroll();
         populateFilterDropdown();
+        initializeAnalytics();
 
         const searchButton = document.getElementById('searchButton');
         const searchInput = document.getElementById('searchInput');
@@ -756,7 +926,13 @@ async function initialize() {
             isLoadingNFTs = false;
             filteredParcels = [];
             
-            if (ETH_ADDRESS_REGEX.test(searchValue)) {
+            if (ETH_ADDRESS_REGEX.test(searchValue) || ENS_REGEX.test(searchValue)) {
+                const resolvedAddress = await resolveAddress(searchValue);
+                
+                if (!ETH_ADDRESS_REGEX.test(resolvedAddress)) {
+                    showError('Invalid address format');
+                    return;
+                }
                 // Create new search results container
                 const searchResults = document.createElement('div');
                 searchResults.id = 'searchResults';
@@ -764,7 +940,8 @@ async function initialize() {
                 
                 try {
                     console.log('Search initiated for ETH address:', searchValue);
-                    const pageData = await fetchNFTPage(searchValue);
+                    const pageData = await fetchNFTPage(resolvedAddress);
+
                     
                     if (!pageData.ownedNfts || pageData.ownedNfts.length === 0) {
                         showError('No NFTs found for this address');
@@ -782,36 +959,245 @@ async function initialize() {
                     analyticsBtn.className = 'analytics-button';
                     analyticsBtn.innerHTML = '📊 View Holdings Analysis';
                     
-                    analyticsBtn.onclick = () => {
+                    analyticsBtn.onclick = async () => {
+                        toggleAnalyticsButton(false); // Hide button when showing analytics
+                        
                         try {
-                            const holdingsByZone = filteredParcels.reduce((acc, parcel) => {
-                                const zone = parcel.ZONING;
-                                acc[zone] = (acc[zone] || 0) + 1;
-                                return acc;
-                            }, {});
-
-                            const analyticsHTML = `
-                                <div class="analytics-container">
-                                    <h3>Holdings Analysis</h3>
-                                    <div class="total-nfts">
-                                        <h4>Total NFTs: ${pageData.totalCount}</h4>
-                                    </div>
-                                    <div class="zone-distribution">
-                                        ${Object.entries(holdingsByZone)
-                                            .map(([zone, count]) => `
-                                                <div class="zone-stat">
-                                                    <span>${getZoningIcon(zone)} ${zone}</span>
-                                                    <span>${count}</span>
-                                                </div>
-                                            `).join('')}
+                            // Create overlay container
+                            const overlay = document.createElement('div');
+                            overlay.className = 'analytics-overlay';
+                            
+                            // Create modal container
+                            const modal = document.createElement('div');
+                            modal.className = 'analytics-modal';
+                            
+                            // Use resolvedAddress instead of searchValue for display
+                            const displayAddress = searchValue.endsWith('.eth') ? 
+                                `${searchValue} (${resolvedAddress.slice(0, 6)}...${resolvedAddress.slice(-4)})` :
+                                `${resolvedAddress.slice(0, 6)}...${resolvedAddress.slice(-4)}`;
+                    
+                            // Set initial loading state
+                            modal.innerHTML = `
+                                <div class="loading-container">
+                                    <div class="loading-spinner"></div>
+                                    <div class="loading-text">
+                                        Please wait while we load your analytics...<br>
+                                        <span style="font-size: 14px; color: #888; margin-top: 10px; display: block;">
+                                            Fetching data for ${displayAddress}
+                                        </span>
                                     </div>
                                 </div>
                             `;
-
-                            searchResults.innerHTML = analyticsHTML;
+                            
+                            // Add close button
+                            const closeBtn = document.createElement('button');
+                            closeBtn.className = 'analytics-close-btn';
+                            closeBtn.innerHTML = '×';
+                            closeBtn.onclick = () => {
+                                overlay.remove();
+                                
+                                // Clear search results and found count
+                                const searchResults = document.getElementById('searchResults');
+                                if (searchResults) searchResults.remove();
+                                
+                                const foundCount = document.querySelector('[class*="found"]');
+                                if (foundCount) foundCount.remove();
+                                
+                                // Reset filtered parcels to show all
+                                filteredParcels = [...allParcelsData];
+                                
+                                // Reset the parcel details container
+                                const parcelDetails = document.getElementById('parcelDetails');
+                                if (parcelDetails) {
+                                    parcelDetails.style.display = 'grid';
+                                    parcelDetails.style.gridTemplateColumns = 'repeat(auto-fill, minmax(300px, 1fr))';
+                                    parcelDetails.style.gap = '20px';
+                                    parcelDetails.style.padding = '20px';
+                                }
+                                
+                                loadMoreParcels(true);
+                                
+                                // Show all UI elements
+                                const searchContainer = document.querySelector('.search-container');
+                                const zoningLegend = document.querySelector('.zoning-legend');
+                                const typewriterContainer = document.querySelector('.typewriter-container');
+                                
+                                if (searchContainer) searchContainer.style.display = 'flex';
+                                if (zoningLegend) zoningLegend.style.display = 'block';
+                                if (typewriterContainer) typewriterContainer.style.display = 'block';
+                            };
+                            
+                            modal.appendChild(closeBtn);
+                            overlay.appendChild(modal);
+                            document.body.appendChild(overlay);
+                    
+                            // Add escape key listener
+                            const escapeHandler = (e) => {
+                                if (e.key === 'Escape') {
+                                    overlay.remove();
+                                    document.removeEventListener('keydown', escapeHandler);
+                                }
+                            };
+                            document.addEventListener('keydown', escapeHandler);
+                            
+                            // Ensure the loading state is visible for at least 500ms
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                            
+                            // Fetch data
+                            const response = await fetch(getApiUrl(resolvedAddress));
+                            const data = await response.json();
+                            
+                            if (!data.success) {
+                                throw new Error(data.error || 'Failed to fetch analytics');
+                            }
+                    
+                            console.log('Number of transfers to display:', data.transfers?.length);
+                    
+                            const analyticsHTML = `
+                                <div class="analytics-container">
+                                    <h3>Holdings Analysis</h3>
+                                    
+                                    <div class="analytics-section">
+                                        <h4>Overview</h4>
+                                        <div class="total-nfts">
+                                            <h4>Total NFTs: ${data.totalCount}</h4>
+                                        </div>
+                                    </div>
+                    
+                                    <div class="analytics-section">
+                                        <h4>Distribution by Zone</h4>
+                                        <div class="zone-distribution">
+                                            ${Object.entries(data.analytics?.holdingsByZone || {})
+                                                .map(([zone, count]) => `
+                                                    <div class="zone-stat">
+                                                        <span>${getZoningIcon(zone)} ${zone}</span>
+                                                        <span>${count}</span>
+                                                    </div>
+                                                `).join('')}
+                                        </div>
+                                    </div>
+                    
+                                    <div class="analytics-section">
+                                        <h4>Distribution by Neighborhood</h4>
+                                        <div class="neighborhood-distribution">
+                                            ${Object.entries(data.analytics?.holdingsByNeighborhood || {})
+                                                .map(([neighborhood, count]) => `
+                                                    <div class="neighborhood-stat">
+                                                        <span>${NEIGHBORHOOD_ICON} ${neighborhood}</span>
+                                                        <span>${count}</span>
+                                                    </div>
+                                                `).join('')}
+                                        </div>
+                                    </div>
+                    
+                                    ${data.transfers && data.transfers.length > 0 ? `
+                                        <div class="analytics-section">
+                                            <h4>Recent Transfers</h4>
+                                            <div class="transfer-history" style="max-height: 500px; overflow-y: auto;">
+                                                ${data.transfers.slice(0, 30).map(transfer => `
+                                                    <div class="transfer-item" style="
+                                                        background: rgba(255, 255, 255, 0.05);
+                                                        border-radius: 8px;
+                                                        padding: 15px;
+                                                        margin-bottom: 10px;
+                                                    ">
+                                                        <div class="transfer-token" style="
+                                                            font-size: 16px;
+                                                            margin-bottom: 8px;
+                                                            display: flex;
+                                                            justify-content: space-between;
+                                                            align-items: center;
+                                                        ">
+                                                            <div>
+                                                                <a href="${transfer.openSeaLink}" 
+                                                                   target="_blank" 
+                                                                   style="color: #00c3ff; text-decoration: none;">
+                                                                    ${transfer.tokenName} 
+                                                                    ${transfer.zone ? getZoningIcon(transfer.zone) : ''}
+                                                                </a>
+                                                                ${transfer.neighborhood ? `
+                                                                    <span style="margin-left: 10px; color: #888;">
+                                                                        ${NEIGHBORHOOD_ICON} ${transfer.neighborhood}
+                                                                    </span>
+                                                                ` : ''}
+                                                            </div>
+                                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                                ${transfer.transactionType === 'bought' ? 
+                                                                    `<span style="color: #00ff00;">Bought 🛍️</span>` :
+                                                                    transfer.transactionType === 'sale' ? 
+                                                                    `<span style="color: #ffd700;">Sold 🏷️</span>` :
+                                                                    `<span style="color: #888;">Transfer ↔️</span>`
+                                                                }
+                                                                <span style="color: #888;">${transfer.timeAgo}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="transfer-details" style="
+                                                            display: grid;
+                                                            grid-template-columns: repeat(3, 1fr);
+                                                            gap: 10px;
+                                                            font-size: 14px;
+                                                            color: #ccc;
+                                                        ">
+                                                            <div>
+                                                                From: <a href="https://etherscan.io/address/${transfer.fromAddress}" 
+                                                                       target="_blank" 
+                                                                       style="color: #00c3ff; text-decoration: none;">
+                                                                    ${transfer.fromAddress.slice(0, 6)}...${transfer.fromAddress.slice(-4)}
+                                                                </a>
+                                                            </div>
+                                                            <div>
+                                                                To: <a href="https://etherscan.io/address/${transfer.toAddress}" 
+                                                                     target="_blank" 
+                                                                     style="color: #00c3ff; text-decoration: none;">
+                                                                    ${transfer.toAddress.slice(0, 6)}...${transfer.toAddress.slice(-4)}
+                                                                </a>
+                                                            </div>
+                                                            <div style="
+                                                                color: ${transfer.transactionType === 'sale' ? 
+                                                                    (transfer.value?.includes('WETH') ? '#ffd700' : '#00ff00') : 
+                                                                    '#888'};
+                                                                text-align: right;
+                                                                font-weight: ${transfer.transactionType === 'sale' ? 'bold' : 'normal'};
+                                                            ">
+                                                                ${transfer.value || 'Transfer'}
+                                                            </div>
+                                                        </div>
+                                                        <div class="transfer-links" style="
+                                                            margin-top: 8px;
+                                                            text-align: right;
+                                                        ">
+                                                            <a href="${transfer.etherscanLink}" 
+                                                               target="_blank" 
+                                                               style="color: #888; text-decoration: none; font-size: 12px;">
+                                                                View on Etherscan
+                                                            </a>
+                                                            ${transfer.value !== 'No price data' ? `
+                                                                <span style="color: #666; margin: 0 5px;">•</span>
+                                                                <a href="${transfer.openSeaLink}" 
+                                                                   target="_blank" 
+                                                                   style="color: #888; text-decoration: none; font-size: 12px;">
+                                                                    View on OpenSea
+                                                                </a>
+                                                            ` : ''}
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                    
+                            modal.innerHTML = analyticsHTML;
+                            modal.insertBefore(closeBtn, modal.firstChild);
+                    
                         } catch (error) {
                             console.error('Analytics error:', error);
-                            showError('Failed to generate analytics');
+                            const errorHTML = `<div class="error">Failed to generate analytics: ${error.message}</div>`;
+                            const modal = document.querySelector('.analytics-modal');
+                            if (modal) {
+                                modal.innerHTML = errorHTML;
+                            }
                         }
                     };
 

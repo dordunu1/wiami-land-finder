@@ -5,14 +5,16 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  included_files = ["data/**"]
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    "Content-Type" = "application/javascript"
+    "X-Content-Type-Options" = "nosniff"
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/.netlify/functions/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
@@ -20,3 +22,10 @@
   publish = "."
   port = 8888
   autoLaunch = true
+  functions = "netlify/functions"
+  functionsPort = 8888
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -68,7 +68,6 @@ body {
     font-size: 14px;
     background: rgba(0, 0, 0, 0.5);
     position: relative;
-    overflow: visible;
     transition: transform 0.3s ease;
 }
 
@@ -379,19 +378,21 @@ body {
     position: relative;
     z-index: 2;
     padding: 20px;
+    margin-top: 60px; /* Add this line to create space below the nav */
 }
 
-/* Search Container and Legend */
+/* Update the search-container styles (around line 386) */
 .search-container {
     max-width: 1200px;
-    margin: 0 auto 30px;
+    margin: 20px auto 30px; /* Adjusted margin */
     display: flex;
     gap: 10px;
     background: rgba(30, 30, 30, 0.8);
     padding: 20px;
     border-radius: 8px;
+    position: relative; /* Add this */
+    z-index: 3; /* Add this */
 }
-
 /* Filter Styles */
 .filter-dropdown-container {
     position: relative;
@@ -476,7 +477,6 @@ body {
     border-radius: 10px;
     max-width: 400px;
     max-height: 80vh;
-    overflow-y: auto;
 }
 
 .typewriter {
@@ -791,16 +791,26 @@ body {
 
 .nft-count {
     text-align: center;
-    color: #fff;
+    color: #eaebf0;
     font-size: 18px;
     margin-bottom: 20px;
 }
 
 .analytics-container {
-    background: rgba(30, 30, 30, 0.7);
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 1200px;
+    height: calc(100vh - 100px);
+    background: rgba(9, 9, 9, 0.932);
+    padding: 20px;
     border-radius: 8px;
-    padding: 15px;
-    margin-top: 15px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    position: relative;  /* Add this to establish positioning context */
 }
 
 .analytics-button {
@@ -809,12 +819,31 @@ body {
     display: block;
     padding: 12px 24px;
     background: #0066FF;
-    color: white;
+    color: rgb(6, 6, 6);
     border: none;
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
     transition: background 0.3s ease;
+}
+
+.analytics-close-btn {
+    position: absolute;  /* Change from fixed to absolute */
+    top: 20px;          /* Adjust to position from top of container */
+    right: 20px;        /* Adjust to position from right of container */
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
 }
 
 .analytics-button:hover {
@@ -850,4 +879,251 @@ body {
     .analytics-button {
         width: 160px;
     }
+}
+
+.analytics-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.transfer-history {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.transfer-item {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.transfer-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #888;
+    margin-top: 5px;
+}
+
+.transfer-item a:hover {
+    color: #fff !important;
+    text-decoration: underline !important;
+}
+
+.transfer-history {
+    scrollbar-width: thin;
+    scrollbar-color: #666 #333;
+}
+
+.transfer-history::-webkit-scrollbar {
+    width: 8px;
+}
+
+.transfer-history::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 4px;
+}
+
+.transfer-history::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+}
+
+.transfer-history::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.9); /* Slightly more opaque */
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Add subtle shadow */
+    height: 60px; /* Fixed height */
+    display: flex;
+    align-items: center;
+}
+
+.nav-links {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    background: transparent; /* Ensure transparent background */
+}
+
+/* Style for the analytics button specifically */
+#analytics-btn.nav-link {
+    background: transparent; /* Override any default button styles */
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 8px 16px;
+}
+
+/* Hover effects */
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+
+.analytics-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.chart-grid > div {
+    min-height: 350px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    padding: 20px;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #ffffff;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loading-text {
+    color: #ffffff;
+    text-align: center;
+    font-size: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.analytics-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.analytics-modal {
+    background: #1a1a1a;
+    border-radius: 8px;
+    padding: 20px;
+    width: 1200px;  /* Fixed width */
+    max-width: 90%;  /* Fallback for mobile */
+    max-height: 100vh;
+    position: relative;
+    margin: 20px;
+}
+
+/* Update this CSS block around line 1102 */
+.analytics-close-btn {
+    position: absolute; /* Change from fixed to absolute */
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.analytics-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 20px;
+}
+
+.analytics-header h2 {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 500;
 }

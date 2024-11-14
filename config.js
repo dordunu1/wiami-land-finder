@@ -1,0 +1,5 @@
+export const config = {
+    ALCHEMY_API_KEY: 'eFm2JZg30eZjF6Ai0VGhqu4KyUEPkh--',
+    ALCHEMY_NETWORK: 'eth-mainnet',
+    WIAMI_CONTRACT_ADDRESS: '0xd396ca541F501F5D303166C509e2045848df356b'
+};

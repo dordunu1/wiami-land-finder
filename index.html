@@ -7,13 +7,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
+    <nav class="main-nav">
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/pages/activity.html" class="nav-link">Activity</a>
+            <button id="analytics-btn" class="nav-link">Analytics</button>
+        </div>
+    </nav>
+
     <div class="hero-image">
         <img src="./images/miami.png" alt="Miami Urban Plan" />
     </div>
     
     <div class="content-wrapper">
+        <div id="search-results-header" class="search-results-header">
+            <!-- Found count will be dynamically inserted here -->
+        </div>
+
         <div class="typewriter-container">
             <div class="typewriter">
                 <button class="typewriter-close"></button>
@@ -24,7 +37,7 @@
             <div id="filterType" class="filter-dropdown-container">
                 <!-- Filter menu will be populated here -->
             </div>
-            <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas or ERC20 Address (0x...)">
+            <input type="text" id="searchInput" placeholder="Enter Plot IDs (separate multiple IDs with spaces or commas or ERC20 Address (0x...) or ENS names">
             <button id="searchButton">Search</button>
         </div>
         
@@ -58,6 +71,29 @@
             <!-- Content will be dynamically loaded here -->
         </div>
     
-    <script src="script.js"></script>
+    <div id="analytics-container" class="analytics-container" style="display: none;">
+        <div class="analytics-header">
+            <h2>Analytics</h2>
+            <button class="analytics-close-btn">×</button>
+        </div>
+        <div class="chart-grid">
+            <div id="neighborhood-chart" class="chart-box"></div>
+            <div id="zoning-chart" class="chart-box"></div>
+            <div id="plot-size-chart" class="chart-box"></div>
+            <div id="building-height-chart" class="chart-box"></div>
+        </div>
+    </div>
+
+    <div id="holdings-analytics-container" class="holdings-analytics-container" style="display: none;">
+        <div class="analytics-header">
+            <h2>Holdings Analysis</h2>
+            <button class="holdings-close-btn">×</button>
+        </div>
+        <div class="holdings-content">
+            <!-- Holdings analytics content will be loaded here -->
+        </div>
+    </div>
+
+    <script src="script.js" type="module"></script>
 </body>
 </html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wiami Land Sales Activity</title>
+    <link rel="stylesheet" href="../styles/activity.css">
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <nav class="nav-bar">
+            <a href="../index.html" class="nav-link">← Back to Search</a>
+            <h1>Wiami Land Sales Activity</h1>
+        </nav>
+
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="activity">Activity</button>
+        </div>
+
+        <!-- Activity Tab Content -->
+        <div class="tab-content active" id="activity-tab">
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <select id="zoning-filter">
+                        <option value="All">All Zoning Types</option>
+                    </select>
+                    <select id="neighborhood-filter">
+                        <option value="All">All Neighborhoods</option>
+                    </select>
+                    <select id="transaction-filter">
+                        <option value="All">All Transaction Types</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Activity List -->
+            <div class="activity-list">
+                <!-- Transactions will be loaded here -->
+                <div id="activity-container"></div>
+                <div class="loading-indicator" style="display: none;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="../js/activityPage.js"></script>
+</body>
+</html>

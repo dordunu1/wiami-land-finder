@@ -2,6 +2,8 @@
   "dependencies": {
     "@netlify/functions": "^1.6.0",
     "alchemy-sdk": "^3.4.7",
+    "apexcharts": "^4.0.0",
+    "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
