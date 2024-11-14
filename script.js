@@ -422,8 +422,7 @@ function displayParcelDetails(parcels, append = false) {
         container.innerHTML = content;
     }
 }
-
-function handleDownload(parcelData) {
+async function handleDownload(parcelData) { 
     try {
         const parcel = JSON.parse(atob(parcelData));
         const parcelCard = document.querySelector(`.parcel-card[data-plot-id="${parcel.NAME}"]`);
@@ -526,6 +525,9 @@ function handleDownload(parcelData) {
         showToast('Error downloading image');
     }
 }
+
+// Add this after your handleDownload function definition
+window.handleDownload = handleDownload;
 
 function populateFilterDropdown() {
     const filterContainer = document.getElementById('filterType');
@@ -741,6 +743,7 @@ function showToast(message) {
         toast.remove();
     }, 5000);
 }
+
 
 async function initializeAnalytics() {
     const analyticsBtn = document.getElementById('analytics-btn');
