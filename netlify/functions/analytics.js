@@ -1,17 +1,32 @@
-// Remove all fs/path related code and simplify
 export async function handler(event, context) {
     try {
-        const address = event.path.split('/').pop();
-        if (!address) {
-            throw new Error('No address provided');
-        }
-
-        // Mock data structure that matches what your frontend expects
-        const analyticsData = {
+        console.log("1. Starting metadata processing...");
+        
+        // Create analytics object with the structure your frontend expects
+        const analytics = {
             success: true,
             data: {
-                totalCount: 0,
+                totalCount: 4444,
                 analytics: {
+                    traits: {
+                        neighborhood: {
+                            'Flashing Lights': { count: 0, percentage: "0.00" },
+                            'North Star': { count: 0, percentage: "0.00" },
+                            'Nexus': { count: 0, percentage: "0.00" },
+                            'District ZERO': { count: 0, percentage: "0.00" },
+                            'Tranquility Gardens': { count: 0, percentage: "0.00" },
+                            'Space Mind': { count: 0, percentage: "0.00" },
+                            'Haven Heights': { count: 0, percentage: "0.00" },
+                            'Little Meow': { count: 0, percentage: "0.00" }
+                        },
+                        zoning: {
+                            'LEGENDARY': { count: 0, percentage: "0.00" },
+                            'MIXED USE': { count: 0, percentage: "0.00" },
+                            'RESIDENTIAL': { count: 0, percentage: "0.00" },
+                            'COMMERCIAL': { count: 0, percentage: "0.00" },
+                            'INDUSTRIAL': { count: 0, percentage: "0.00" }
+                        }
+                    },
                     holdingsByZone: {
                         'LEGENDARY': 0,
                         'MIXED USE': 0,
@@ -37,9 +52,10 @@ export async function handler(event, context) {
         return {
             statusCode: 200,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=3600'
             },
-            body: JSON.stringify(analyticsData)
+            body: JSON.stringify(analytics)
         };
 
     } catch (error) {
