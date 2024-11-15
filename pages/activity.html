@@ -27,15 +27,19 @@
             <!-- Filters Section -->
             <div class="filters-section">
                 <div class="filter-group">
-                    <select id="zoning-filter">
-                        <option value="All">All Zoning Types</option>
-                    </select>
-                    <select id="neighborhood-filter">
-                        <option value="All">All Neighborhoods</option>
-                    </select>
-                    <select id="transaction-filter">
-                        <option value="All">All Transaction Types</option>
-                    </select>
+                    <div class="filter-container">
+                        <select data-filter="zoningType" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        
+                        <select data-filter="neighborhood" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        
+                        <select data-filter="transactionType" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
                 </div>
             </div>
 

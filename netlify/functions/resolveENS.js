@@ -1,17 +1,34 @@
 import { Alchemy, Network } from "alchemy-sdk";
 
-export const handler = async (event) => {
+// Utility function for internal use
+export const resolveEns = async (address) => {
     try {
-        const ensName = event.path.split('/').pop();
-        
-        // Configure Alchemy
         const config = {
             apiKey: process.env.ALCHEMY_API_KEY,
             network: Network.ETH_MAINNET
         };
         const alchemy = new Alchemy(config);
 
-        // Use Alchemy's built-in ENS resolution
+        // Get ENS name for the address
+        const ensName = await alchemy.core.lookupAddress(address);
+        return ensName || null;
+    } catch (error) {
+        console.error('Error resolving ENS:', error);
+        return null;
+    }
+};
+
+// Netlify serverless function handler
+export const handler = async (event) => {
+    try {
+        const ensName = event.path.split('/').pop();
+        
+        const config = {
+            apiKey: process.env.ALCHEMY_API_KEY,
+            network: Network.ETH_MAINNET
+        };
+        const alchemy = new Alchemy(config);
+
         const address = await alchemy.core.resolveName(ensName);
         
         if (!address) {

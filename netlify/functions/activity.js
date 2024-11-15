@@ -1,30 +1,31 @@
 import { Alchemy, Network } from "alchemy-sdk";
-import { ActivityAPI } from './activityApi.js';  // Import from local copy
+import { ActivityAPI } from './activityApi.js';
 
 export const handler = async (event) => {
     try {
-        if (event.httpMethod === 'POST') {
-            console.log('Activity request received');
+        console.log('Activity request received');
+        
+        // Handle both GET and POST requests
+        const pageKey = event.httpMethod === 'POST' 
+            ? JSON.parse(event.body || '{}').pageKey
+            : event.queryStringParameters?.page;
             
-            const body = JSON.parse(event.body || '{}');
-            const pageKey = body.pageKey;
-            
-            const result = await ActivityAPI.getRecentSales(50, pageKey);
-            
-            return {
-                statusCode: 200,
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    success: true,
-                    activity: result.sales,
-                    nextPageKey: result.pageKey,
-                    totalCount: result.sales.length
-                })
-            };
-        }
+        const result = await ActivityAPI.getRecentSales(50, pageKey);
+        
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                success: true,
+                events: result.sales, // Changed to match frontend expectation
+                nextPage: result.pageKey, // Changed to match frontend expectation
+                totalCount: result.sales.length
+            })
+        };
+
     } catch (error) {
         console.error('Handler error:', error);
         return {
