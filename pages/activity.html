@@ -5,54 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wiami Land Sales Activity</title>
     <link rel="stylesheet" href="../styles/activity.css">
-    <!-- Chart.js for graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Navigation -->
         <nav class="nav-bar">
             <a href="../index.html" class="nav-link">← Back to Search</a>
-            <h1>Wiami Land Sales Activity</h1>
+            <span>Wiami Land Sales Activity</span>
         </nav>
 
-        <!-- Tab Navigation -->
-        <div class="tab-container">
-            <button class="tab-button active" data-tab="activity">Activity</button>
+        <div class="activity-tabs">
+            <button class="tab active" data-tab="opensea-activity">OpenSea Activity</button>
+            <button class="tab" data-tab="wwmm-activity">WWMM Activity</button>
         </div>
 
-        <!-- Activity Tab Content -->
-        <div class="tab-content active" id="activity-tab">
-            <!-- Filters Section -->
+        <div id="opensea-tab" class="tab-content active">
             <div class="filters-section">
                 <div class="filter-group">
-                    <div class="filter-container">
-                        <select data-filter="zoningType" class="filter-select">
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                        
-                        <select data-filter="neighborhood" class="filter-select">
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                        
-                        <select data-filter="transactionType" class="filter-select">
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                    </div>
+                    <select data-filter="zoningType" class="filter-select">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                    <select data-filter="neighborhood" class="filter-select">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                    <select data-filter="transactionType" class="filter-select">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
                 </div>
             </div>
+            <div id="opensea-activity-container"></div>
+            <div id="opensea-loader" class="loading-indicator" style="display: none;">Loading...</div>
+        </div>
 
-            <!-- Activity List -->
-            <div class="activity-list">
-                <!-- Transactions will be loaded here -->
-                <div id="activity-container"></div>
-                <div class="loading-indicator" style="display: none;">Loading...</div>
-            </div>
+        <div id="wwmm-tab" class="tab-content">
+            <div id="wwmm-activity-container"></div>
+            <div id="wwmm-loader" class="loading-indicator" style="display: none;">Loading...</div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script type="module" src="../js/activityPage.js"></script>
+    <script type="module" src="../js/wwmmActivityPage.js"></script>
+    <script type="module">
+        // Tab switching logic
+        document.querySelectorAll('.tab').forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                button.classList.add('active');
+                document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>

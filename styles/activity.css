@@ -571,3 +571,61 @@ select {
     top: 0;
     left: 0;
 }
+
+.activity-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.activity-tabs .tab {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.activity-tabs .tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.activity-tabs .tab.active {
+    background: #d9703d;
+}
+
+#wwmm-activity-container {
+    margin-top: 20px;
+}
+
+/* WILD Sale Styling */
+.wild-sale {
+    color: #d9703d;  /* Dark Orange */
+}
+
+.wild-sale .value {
+    color: #d9703d;  /* Dark Orange */
+    font-weight: 600;
+}
+
+/* WWMM Link Styling */
+.platform-links .wwmm {
+    color: #d9703d;  /* Dark Orange */
+}
+
+.platform-links .wwmm:hover {
+    opacity: 0.8;
+}
+
+.end-of-results {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+    margin-top: 20px;
+    border-top: 1px solid #333;
+}

@@ -2,6 +2,8 @@ import { Alchemy, Network } from "alchemy-sdk";
 
 // Utility function for internal use
 export const resolveEns = async (address) => {
+    if (!address) return null;
+    
     try {
         const config = {
             apiKey: process.env.ALCHEMY_API_KEY,
@@ -9,11 +11,21 @@ export const resolveEns = async (address) => {
         };
         const alchemy = new Alchemy(config);
 
-        // Get ENS name for the address
-        const ensName = await alchemy.core.lookupAddress(address);
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('ENS lookup timeout')), 5000);
+        });
+
+        // Race between the ENS lookup and timeout
+        const ensName = await Promise.race([
+            alchemy.core.lookupAddress(address),
+            timeoutPromise
+        ]);
+
         return ensName || null;
     } catch (error) {
-        console.error('Error resolving ENS:', error);
+        // Silently fail and return null for any ENS errors
+        console.log(`ENS resolution skipped for ${address}`);
         return null;
     }
 };

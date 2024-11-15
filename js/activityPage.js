@@ -39,7 +39,7 @@ class ActivityPage {
             this.setupFilterListeners();
         } catch (error) {
             console.error('Error initializing activity page:', error);
-            document.querySelector('.activity-container').innerHTML = 
+            document.getElementById('opensea-activity-container').innerHTML = 
                 '<div class="error-message">Failed to load activity. Please try again later.</div>';
         }
     }
@@ -81,7 +81,7 @@ class ActivityPage {
     }
 
     renderActivity() {
-        const container = document.getElementById('activity-container');
+        const container = document.getElementById('opensea-activity-container');
         if (!container) return;
     
         if (!this.activity || this.activity.length === 0) {
@@ -169,17 +169,17 @@ class ActivityPage {
     }
 
     showLoading() {
-        const loader = document.getElementById('activity-loader');
+        const loader = document.getElementById('opensea-loader');
         if (loader) loader.style.display = 'block';
     }
 
     hideLoading() {
-        const loader = document.getElementById('activity-loader');
+        const loader = document.getElementById('opensea-loader');
         if (loader) loader.style.display = 'none';
     }
 
     showError(message) {
-        const container = document.getElementById('activity-container');
+        const container = document.getElementById('opensea-activity-container');
         if (container) {
             container.innerHTML = `<div class="error-message">${message}</div>`;
         }
@@ -286,7 +286,7 @@ class ActivityPage {
     }
 
     renderFilteredActivity(filteredItems) {
-        const container = document.getElementById('activity-container');
+        const container = document.getElementById('opensea-activity-container');
         if (!container) return;
 
         if (filteredItems.length === 0) {
@@ -294,6 +294,7 @@ class ActivityPage {
             return;
         }
 
+        // Use the existing renderActivity logic but with filtered items
         const activityHtml = filteredItems.map(item => `
             <div class="activity-item">
                 <div class="activity-content">
