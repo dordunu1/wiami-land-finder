@@ -298,9 +298,21 @@ select {
 .price-info {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    margin-bottom: 0.25rem;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.expiration {
+    font-size: 0.7rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+.price {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #00ff88;
+    white-space: nowrap;
 }
 
 /* Timestamp */
@@ -628,4 +640,314 @@ select {
     font-style: italic;
     margin-top: 20px;
     border-top: 1px solid #333;
+}
+
+/* Main content visibility */
+.main-content {
+    display: none;
+}
+
+.main-content.active {
+    display: block;
+}
+
+/* Main tabs styling */
+.main-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.main-tab {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.main-tab.active {
+    color: #fff;
+    position: relative;
+}
+
+.main-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #00c6ff;
+}
+
+/* Listings tabs styling */
+.listings-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.listings-tabs .tab {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.listings-tabs .tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.listings-tabs .tab.active {
+    background: #d9703d;
+}
+
+
+/* Listings Container */
+#opensea-listings-container,
+#wwmm-listings-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    padding: 8px;
+}
+
+/* Listing Card */
+.listing-card {
+    background: rgb(8, 8, 8);
+    border: 1px solid #333;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    margin: 4px;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
+}
+
+.listing-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Image container */
+.listing-image {
+    width: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+}
+
+.listing-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Info section */
+.listing-info {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+.price {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #00ff88;
+    margin: 2px 0;
+    margin-right: 8px; /* Add right margin to move it left */
+}
+/* Traits grid */
+.traits {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin: 2px 0;
+}
+
+.trait {
+    background: #111;
+    padding: 3px;
+    border-radius: 2px;
+    border: 1px solid #222;
+}
+
+.trait-type {
+    display: block;
+    font-size: 0.6rem;
+    color: #666;
+    margin-bottom: 1px;
+}
+
+.trait-value {
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Buy button */
+.buy-button {
+    padding: 6px;
+    background: #2081e2;
+    color: white;
+    text-align: center;
+    border-radius: 3px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.buy-button:hover {
+    background: #1868b7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    #opensea-listings-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    #opensea-listings-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    #opensea-listings-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    #opensea-listings-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Add these styles to your existing CSS */
+
+.listing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.zoning-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+
+.listing-image img {
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.listing-price {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2081e2;
+    margin: 8px 0;
+}
+
+.listing-traits {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.trait {
+    background: #040404;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.trait-type {
+    font-weight: bold;
+    color: #666;
+}
+
+.listing-details {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+.detail {
+    margin: 4px 0;
+}
+
+.detail-type {
+    color: #666;
+}
+
+/* Title and price row adjustments */
+.title-price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 4px;
+    padding: 4px;
+}
+/* Expiration styling - move to bottom */
+.expiration {
+    font-size: 0.65rem;
+    color: #d9703d;
+    white-space: nowrap;
+    text-align: right;
+    order: 2; /* Ensure expiration appears second */
+}
+
+.listing-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #ead206;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 4px;
+}
+
+.price {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #00ff88;
+    white-space: nowrap;
+    margin-right: 4px;
+    order: 1;
+}
+
+.zoning-icon {
+    font-size: 0.9rem;
+    line-height: 1;
+}
+
+.listing-title {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #ead206;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }

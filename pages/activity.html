@@ -14,46 +14,98 @@
             <span>Wiami Land Sales Activity</span>
         </nav>
 
-        <div class="activity-tabs">
-            <button class="tab active" data-tab="opensea-activity">OpenSea Activity</button>
-            <button class="tab" data-tab="wwmm-activity">WWMM Activity</button>
+        <!-- Main Navigation Tabs -->
+        <div class="main-tabs">
+            <button class="main-tab active" data-main="activity">Activity</button>
+            <button class="main-tab" data-main="listings">Listings</button>
         </div>
 
-        <div id="opensea-tab" class="tab-content active">
-            <div class="filters-section">
-                <div class="filter-group">
-                    <select data-filter="zoningType" class="filter-select">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                    <select data-filter="neighborhood" class="filter-select">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                    <select data-filter="transactionType" class="filter-select">
-                        <!-- Options will be populated by JavaScript -->
-                    </select>
-                </div>
+        <!-- Activity Section -->
+        <div id="activity-section" class="main-content active">
+            <div class="activity-tabs">
+                <button class="tab active" data-tab="opensea-activity">OpenSea Activity</button>
+                <button class="tab" data-tab="wwmm-activity">WWMM Activity</button>
             </div>
-            <div id="opensea-activity-container"></div>
-            <div id="opensea-loader" class="loading-indicator" style="display: none;">Loading...</div>
+
+            <div id="opensea-tab" class="tab-content active">
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <select data-filter="zoningType" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <select data-filter="neighborhood" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <select data-filter="transactionType" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div id="opensea-activity-container"></div>
+                <div id="opensea-loader" class="loading-indicator" style="display: none;">Loading...</div>
+            </div>
+
+            <div id="wwmm-tab" class="tab-content">
+                <div id="wwmm-activity-container"></div>
+                <div id="wwmm-loader" class="loading-indicator" style="display: none;">Loading...</div>
+            </div>
         </div>
 
-        <div id="wwmm-tab" class="tab-content">
-            <div id="wwmm-activity-container"></div>
-            <div id="wwmm-loader" class="loading-indicator" style="display: none;">Loading...</div>
+        <!-- Listings Section -->
+        <div id="listings-section" class="main-content">
+            <div class="listings-tabs">
+                <button class="tab active" data-tab="opensea-listings">OpenSea Listings</button>
+                <button class="tab" data-tab="wwmm-listings">WWMM Listings</button>
+            </div>
+
+            <div id="opensea-listings-tab" class="tab-content active">
+                
+                <div id="opensea-listings-container"></div>
+                <div id="opensea-listings-loader" class="loading-indicator" style="display: none;">Loading...</div>
+            </div>
+
+            <div id="wwmm-listings-tab" class="tab-content">
+                
+                <div id="wwmm-listings-container"></div>
+                <div id="wwmm-listings-loader" class="loading-indicator" style="display: none;">Loading...</div>
+            </div>
         </div>
     </div>
 
     <script type="module" src="../js/activityPage.js"></script>
     <script type="module" src="../js/wwmmActivityPage.js"></script>
+    <script type="module" src="../js/listingsPage.js"></script>
     <script type="module">
-        // Tab switching logic
-        document.querySelectorAll('.tab').forEach(button => {
+        // Main tab switching logic
+        document.querySelectorAll('.main-tab').forEach(button => {
             button.addEventListener('click', () => {
-                // Remove active class from all tabs
-                document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                // Remove active class from all main tabs and content
+                document.querySelectorAll('.main-tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.main-content').forEach(content => content.classList.remove('active'));
                 
-                // Add active class to clicked tab
+                // Add active class to clicked main tab and its content
+                button.classList.add('active');
+                document.getElementById(`${button.dataset.main}-section`).classList.add('active');
+            });
+        });
+
+        // Activity tabs switching logic
+        document.querySelectorAll('.activity-tabs .tab').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabsContainer = button.closest('.activity-tabs');
+                tabsContainer.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('#activity-section .tab-content').forEach(content => content.classList.remove('active'));
+                button.classList.add('active');
+                document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+
+        // Listings tabs switching logic
+        document.querySelectorAll('.listings-tabs .tab').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabsContainer = button.closest('.listings-tabs');
+                tabsContainer.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('#listings-section .tab-content').forEach(content => content.classList.remove('active'));
                 button.classList.add('active');
                 document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
             });
