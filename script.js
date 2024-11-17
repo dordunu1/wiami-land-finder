@@ -62,7 +62,6 @@ function getZoningIcon(zoning) {
 
 function setupTypewriter() {
     const content = `# Wiami Urban Planning Plot Search (UNOFFICIAL)
-https://unofficialfinder.netlify.app/
 
 Core Features:
 • Search by Plot ID, ETH Address, or ENS Name
@@ -71,6 +70,7 @@ Core Features:
 • Genesis Land Analytics & Statistics
 • Activity Tracking for Land Sales & Transfers
 • Holdings Analysis Dashboard
+• Opensea and WWMM sales and listings activities
 
 Search Options:
 • Plot ID Search
