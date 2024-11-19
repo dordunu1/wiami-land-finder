@@ -60,7 +60,11 @@ class WWMMActivityPage {
 
     async init() {
         try {
-            await this.loadActivity();
+            await Promise.all([
+                this.loadActivity(),
+                this.loadVolumeStats()
+            ]);
+            
             if (this.nextPageKey) {
                 this.setupScrollListener();
             }
@@ -145,6 +149,46 @@ class WWMMActivityPage {
         } finally {
             this.isLoading = false;
             this.hideLoading();
+        }
+    }
+
+    async loadVolumeStats() {
+        const volumeElements = {
+            '24h': {
+                volume: '24h-volume',
+                volumeUsd: '24h-volume-usd',
+                count: '24h-count'
+            },
+            '7d': {
+                volume: '7d-volume',
+                volumeUsd: '7d-volume-usd',
+                count: '7d-count'
+            },
+            'allTime': {
+                volume: 'all-time-volume',
+                volumeUsd: 'all-time-volume-usd',
+                count: 'all-time-count'
+            }
+        };
+
+        try {
+            const response = await fetch('/.netlify/functions/wwmmVolume');
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const data = await response.json();
+            this.updateVolumeStats(data);
+        } catch (error) {
+            console.error('Error loading volume stats:', error);
+            
+            // Show error state
+            Object.values(volumeElements).forEach(({volume, volumeUsd, count}) => {
+                document.getElementById(volume).textContent = 'Error loading data';
+                document.getElementById(volumeUsd).textContent = '';
+                document.getElementById(count).textContent = '';
+            });
+
+            // Retry after 5 seconds
+            setTimeout(() => this.loadVolumeStats(), 5000);
         }
     }
 
@@ -467,5 +511,34 @@ class WWMMActivityPage {
             window.removeEventListener('scroll', this.scrollListener);
             this.scrollListener = null;
         }
+    }
+
+    updateVolumeStats(stats) {
+        // Update WILD volumes
+        document.getElementById('24h-volume').textContent = `${Number(stats.oneDay.volume).toLocaleString()} WILD`;
+        document.getElementById('7d-volume').textContent = `${Number(stats.sevenDay.volume).toLocaleString()} WILD`;
+        document.getElementById('all-time-volume').textContent = `${Number(stats.allTime.volume).toLocaleString()} WILD`;
+
+        // Update USD values
+        const usdElements = {
+            '24h': document.getElementById('24h-volume-usd'),
+            '7d': document.getElementById('7d-volume-usd'),
+            'allTime': document.getElementById('all-time-volume-usd')
+        };
+
+        if (stats.oneDay.volumeUSD) {
+            usdElements['24h'].textContent = `($${Number(stats.oneDay.volumeUSD).toLocaleString()})`;
+            usdElements['7d'].textContent = `($${Number(stats.sevenDay.volumeUSD).toLocaleString()})`;
+            usdElements['allTime'].textContent = `($${Number(stats.allTime.volumeUSD).toLocaleString()})`;
+        } else {
+            Object.values(usdElements).forEach(element => {
+                element.textContent = '';
+            });
+        }
+
+        // Update sale counts
+        document.getElementById('24h-count').textContent = `${stats.oneDay.count} sales`;
+        document.getElementById('7d-count').textContent = `${stats.sevenDay.count} sales`;
+        document.getElementById('all-time-count').textContent = `${stats.allTime.count} sales`;
     }
 }

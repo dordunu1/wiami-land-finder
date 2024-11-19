@@ -11,11 +11,11 @@ class ActivityPage {
         };
         this.filterOptions = {
             zoningType: ['All Zoning Types', 'Residential', 'Commercial', 'Industrial', 'Mixed Use', 'Legendary'],
-            neighborhood: ['All Neighborhoods', 'North Star', 'Little Meow', 'Flashing Lights', 'Tranquility Gardens', 'District Zero'],
+            neighborhood: ['All Neighborhoods', 'North Star', 'Little Meow', 'Flashing Lights', 'Tranquility Gardens', 'District ZERO', 'Space Mind','Nexus','Haven Heights'],
             transactionType: ['All Transaction Types', 'ETH', 'WETH']
         };
         this.zoningIcons = {
-            'Legendary': '👾',
+            'Legendary': '💎',
             'Mixed Use': '🏆',
             'Residential': '🏠',
             'Commercial': '🏢',

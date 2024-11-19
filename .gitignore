@@ -20,3 +20,6 @@ server.js
 # IDE
 .vscode/
 .idea/
+
+# Cache files
+netlify/functions/data/rankings-cache.json

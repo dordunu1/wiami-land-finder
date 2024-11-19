@@ -46,6 +46,26 @@
             </div>
 
             <div id="wwmm-tab" class="tab-content">
+                <div id="wwmm-volume-stats" class="volume-stats-container">
+                    <div class="volume-stat">
+                        <h3>24h Volume</h3>
+                        <div class="volume-value" id="24h-volume">Loading...</div>
+                        <div class="volume-value-usd" id="24h-volume-usd"></div>
+                        <div class="volume-count" id="24h-count"></div>
+                    </div>
+                    <div class="volume-stat">
+                        <h3>7d Volume</h3>
+                        <div class="volume-value" id="7d-volume">Loading...</div>
+                        <div class="volume-value-usd" id="7d-volume-usd"></div>
+                        <div class="volume-count" id="7d-count"></div>
+                    </div>
+                    <div class="volume-stat">
+                        <h3>All Time</h3>
+                        <div class="volume-value" id="all-time-volume">Loading...</div>
+                        <div class="volume-value-usd" id="all-time-volume-usd"></div>
+                        <div class="volume-count" id="all-time-count"></div>
+                    </div>
+                </div>
                 <div id="wwmm-activity-container"></div>
                 <div id="wwmm-loader" class="loading-indicator" style="display: none;">Loading...</div>
             </div>
@@ -59,13 +79,24 @@
             </div>
 
             <div id="opensea-listings-tab" class="tab-content active">
-                
+                <div class="filters-section" id="opensea-listings-filters">
+                    <div class="filter-group">
+                        <select data-filter="zoningType" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <select data-filter="neighborhood" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                        <select data-filter="sortBy" class="filter-select">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
                 <div id="opensea-listings-container"></div>
                 <div id="opensea-listings-loader" class="loading-indicator" style="display: none;">Loading...</div>
             </div>
 
             <div id="wwmm-listings-tab" class="tab-content">
-                
                 <div id="wwmm-listings-container"></div>
                 <div id="wwmm-listings-loader" class="loading-indicator" style="display: none;">Loading...</div>
             </div>
