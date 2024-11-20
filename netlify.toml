@@ -5,7 +5,6 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["xlsx"]
   included_files = ["netlify/functions/data/**", "netlify/functions/services/**", "blockchain/**"]  # Added services/**
 
 [[headers]]

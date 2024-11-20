@@ -62,6 +62,8 @@ function getZoningIcon(zoning) {
 
 function setupTypewriter() {
     const content = `# Wiami Urban Planning Plot Search (UNOFFICIAL)
+Developer: chriswilder
+Follow me on Twitter: @realchriswilder
 
 Core Features:
 • Search by Plot ID, ETH Address, or ENS Name
