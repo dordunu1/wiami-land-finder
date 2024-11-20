@@ -285,14 +285,16 @@ export class OpenSeaListings {
                     </div>
                     <div class="listing-info">
                         <div class="title-price-row">
-                            <h3 class="listing-title">
-                                <span class="zoning-icon">${this.getZoningIcon(metadata.metadata.attributes)}</span>
-                                ${metadata.metadata.name}
-                                ${rarityRank ? `<span class="rarity-rank">#${rarityRank}</span>` : ''}
-                            </h3>
+                            <div class="title-section">
+                                <h3 class="listing-title">
+                                    <span class="zoning-icon">${this.getZoningIcon(metadata.metadata.attributes)}</span>
+                                    ${metadata.metadata.name}
+                                </h3>
+                                ${rarityRank ? `<div class="rarity-rank">#${rarityRank}</div>` : ''}
+                            </div>
                             <div class="price-info">
-                                <div class="expiration">Expires ${formattedExpiration}</div>
                                 <div class="price">${priceEth} ${currency}</div>
+                                <div class="expiration">Expires ${formattedExpiration}</div>
                             </div>
                         </div>
                         <div class="traits">

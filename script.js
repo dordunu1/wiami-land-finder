@@ -93,7 +93,6 @@ Plot Features:
 • 📊 Holdings Dashboard
 • 📸 Plot Card Export
 
-
 Recent Updates:
 • ENS Domain Search Support
 • Genesis Land Analytics
@@ -101,20 +100,9 @@ Recent Updates:
 • Address Holdings Dashboard
 • Transfer History Tracking
 • Real-time Market Data
-
-Instructions:
-1. Search using:
-   - Plot IDs
-   - ETH Address
-   - ENS Name
-2. Explore Analytics:
-   - Genesis Land Stats
-   - Market Activity
-   - Holdings Analysis
-3. View Plot Details:
-   - Hologram Preview
-   - Video 
-   - Download Data`;
+• 24h/7d/All-time Sales Volume Stats with USD
+• Enhanced OpenSea Filters (Rarity, Zoning, Price)
+• UI Layout Improvements`;
 
    // Add this at the top with your other constants
     const analyticsBtn = document.getElementById('analytics-btn');
