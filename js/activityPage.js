@@ -169,12 +169,12 @@ class ActivityPage {
     }
 
     showLoading() {
-        const loader = document.getElementById('opensea-loader');
-        if (loader) loader.style.display = 'block';
+        const loader = document.getElementById('opensea-activity-loader');
+        if (loader) loader.style.display = 'flex';
     }
 
     hideLoading() {
-        const loader = document.getElementById('opensea-loader');
+        const loader = document.getElementById('opensea-activity-loader');
         if (loader) loader.style.display = 'none';
     }
 

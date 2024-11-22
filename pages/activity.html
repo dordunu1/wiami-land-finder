@@ -27,6 +27,7 @@
                 <button class="tab" data-tab="wwmm-activity">WWMM Activity</button>
             </div>
 
+            <!-- OpenSea Tab Content -->
             <div id="opensea-tab" class="tab-content active">
                 <div class="filters-section">
                     <div class="filter-group">
@@ -42,10 +43,14 @@
                     </div>
                 </div>
                 <div id="opensea-activity-container"></div>
-                <div id="opensea-loader" class="loading-indicator" style="display: none;">Loading...</div>
+                <div id="opensea-activity-loader" class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <div class="loading-text">Loading OpenSea activity...</div>
+                </div>
             </div>
 
-            <div id="wwmm-tab" class="tab-content">
+            <!-- WWMM Tab Content -->
+            <div id="wwmm-tab" class="tab-content" style="display: none;">
                 <div id="wwmm-volume-stats" class="volume-stats-container">
                     <div class="volume-stat">
                         <h3>24h Volume</h3>
@@ -67,7 +72,7 @@
                     </div>
                 </div>
                 <div id="wwmm-activity-container"></div>
-                <div id="wwmm-loader" class="loading-indicator" style="display: none;">Loading...</div>
+                <div id="wwmm-activity-loader" class="loading-indicator" style="display: none;">Loading...</div>
             </div>
         </div>
 
@@ -93,7 +98,6 @@
                     </div>
                 </div>
                 <div id="opensea-listings-container"></div>
-                <div id="opensea-listings-loader" class="loading-indicator" style="display: none;">Loading...</div>
             </div>
 
             <div id="wwmm-listings-tab" class="tab-content">

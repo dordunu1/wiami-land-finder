@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         wwmmTab.classList.add('active');
 
         // Show/hide containers
-        openSeaContainer.style.display = 'none';
-        wwmmContainer.style.display = 'block';
+        document.getElementById('opensea-tab').style.display = 'none';
+        document.getElementById('wwmm-tab').style.display = 'block';
 
         // Load WWMM activity if not already loaded
         wwmmActivityPage.init();
@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
         openSeaTab.classList.add('active');
 
         // Show/hide containers
-        wwmmContainer.style.display = 'none';
-        openSeaContainer.style.display = 'block';
+        document.getElementById('wwmm-tab').style.display = 'none';
+        document.getElementById('opensea-tab').style.display = 'block';
     });
 });
 
@@ -77,22 +77,11 @@ class WWMMActivityPage {
     }
 
     async loadActivity() {
-        // First check - if we're at the end, don't even try
         if (this.isLoading || (!this.nextPageKey && this.currentPage > 1)) {
-            if (!this.nextPageKey) {
-                this.removeScrollListener();
-                // Ensure we have the end message
-                const container = document.getElementById('wwmm-activity-container');
-                if (container && !container.querySelector('.end-of-results')) {
-                    container.insertAdjacentHTML('beforeend', 
-                        '<div class="end-of-results">End of activity results</div>');
-                }
-            }
             return;
         }
         
         this.isLoading = true;
-        this.showLoading();
         
         try {
             const response = await fetch(`/.netlify/functions/wwmmActivity?limit=25${this.nextPageKey ? `&pageKey=${this.nextPageKey}` : ''}`, {
@@ -106,19 +95,13 @@ class WWMMActivityPage {
             
             const data = await response.json();
             
-            // If we get an empty response or no pageKey, we're at the end
-            if (!data.activities || data.activities.length === 0 || !data.pageKey) {
+            if (!data.activities || data.activities.length === 0) {
                 this.nextPageKey = null;
                 this.removeScrollListener();
-                const container = document.getElementById('wwmm-activity-container');
-                if (container && !container.querySelector('.end-of-results')) {
-                    container.insertAdjacentHTML('beforeend', 
-                        '<div class="end-of-results">End of activity results</div>');
-                }
+                this.ensureEndMessage();
                 return;
             }
-            
-            // Only add new unique activities
+
             const newActivities = data.activities.filter(newActivity => 
                 !this.activity.some(existingActivity => 
                     existingActivity.transactionHash === newActivity.transactionHash
@@ -131,24 +114,25 @@ class WWMMActivityPage {
                 this.currentPage++;
                 this.renderActivity();
             } else {
-                // If we got no new activities, we're probably at the end
                 this.nextPageKey = null;
                 this.removeScrollListener();
-                const container = document.getElementById('wwmm-activity-container');
-                if (container && !container.querySelector('.end-of-results')) {
-                    container.insertAdjacentHTML('beforeend', 
-                        '<div class="end-of-results">End of activity results</div>');
-                }
+                this.ensureEndMessage();
             }
         } catch (error) {
             console.error('Error loading WWMM activity:', error);
-            // Only show error to user if it's not an ENS resolution error
-            if (!error.message.includes('ENS')) {
-                this.showError('Failed to load WWMM activity. Please try again later.');
-            }
+            this.showError('Failed to load activity. Please try again later.');
         } finally {
             this.isLoading = false;
             this.hideLoading();
+        }
+    }
+
+    // Helper method to ensure end message is shown
+    ensureEndMessage() {
+        const container = document.getElementById('wwmm-activity-container');
+        if (container && !container.querySelector('.end-of-results')) {
+            container.insertAdjacentHTML('beforeend', 
+                '<div class="end-of-results">End of activity results</div>');
         }
     }
 
@@ -309,12 +293,12 @@ class WWMMActivityPage {
     }
 
     showLoading() {
-        const loader = document.getElementById('wwmm-loader');
+        const loader = document.getElementById('wwmm-activity-loader');
         if (loader) loader.style.display = 'block';
     }
 
     hideLoading() {
-        const loader = document.getElementById('wwmm-loader');
+        const loader = document.getElementById('wwmm-activity-loader');
         if (loader) loader.style.display = 'none';
     }
 
@@ -489,16 +473,18 @@ class WWMMActivityPage {
     }
 
     setupScrollListener() {
-        if (this.scrollListener) {
-            this.removeScrollListener();
-        }
-        
         this.scrollListener = async () => {
-            // More conservative scroll trigger
-            const scrollPosition = window.innerHeight + window.scrollY;
-            const threshold = document.body.offsetHeight - 300; // Reduced from 500
+            // Only proceed if we have more data to load and aren't currently loading
+            if (!this.nextPageKey || this.isLoading) return;
             
-            if (this.nextPageKey && !this.isLoading && scrollPosition >= threshold) {
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const threshold = document.body.offsetHeight - 300;
+            
+            if (scrollPosition >= threshold) {
+                // Only show loader for subsequent page loads
+                if (this.currentPage > 1) {
+                    this.showLoading();
+                }
                 await this.loadActivity();
             }
         };
