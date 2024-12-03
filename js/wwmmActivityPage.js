@@ -310,7 +310,10 @@ class WWMMActivityPage {
     }
 
     formatPrice(price) {
-        return Number(price).toFixed(2);
+        return Number(price).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
     }
 
     formatTimestamp(timestamp) {
