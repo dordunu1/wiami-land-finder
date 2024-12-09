@@ -25,50 +25,69 @@ class WWMMVolumeAPI {
             const oneDayAgo = now - 24 * 60 * 60;
             const sevenDaysAgo = now - 7 * 24 * 60 * 60;
 
-            // Fetch all sales at once with a high limit
-            let url = `${RESERVOIR_API_URL}/sales/v6?contract=${WWMM_CONTRACT}&limit=100&payment=${WILD_TOKEN}`;
-
-            const response = await fetch(url, {
-                headers: {
-                    'accept': '*/*',
-                    'x-api-key': RESERVOIR_API_KEY
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Reservoir API error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            
             const volumes = {
                 oneDay: { volume: BigInt(0), count: 0 },
                 sevenDay: { volume: BigInt(0), count: 0 },
                 allTime: { volume: BigInt(0), count: 0 }
             };
 
-            // Process all sales
-            data.sales?.forEach(sale => {
-                const isWildSale = sale.price?.currency?.contract?.toLowerCase() === WILD_TOKEN.toLowerCase();
-                const isWWMMSale = sale.fillSource?.toLowerCase()?.includes('wilder') || 
-                                 sale.orderSource?.toLowerCase()?.includes('wilder');
+            let continuation = null;
+            let hasMore = true;
 
-                if (isWildSale && isWWMMSale) {
-                    const saleValue = BigInt(sale.price.amount.raw);
-                    volumes.allTime.volume += saleValue;
-                    volumes.allTime.count++;
+            while (hasMore) {
+                let url = `${RESERVOIR_API_URL}/sales/v6?contract=${WWMM_CONTRACT}&limit=1000&payment=${WILD_TOKEN}`;
+                if (continuation) {
+                    url += `&continuation=${continuation}`;
+                }
 
-                    if (sale.timestamp >= sevenDaysAgo) {
-                        volumes.sevenDay.volume += saleValue;
-                        volumes.sevenDay.count++;
+                const response = await fetch(url, {
+                    headers: {
+                        'accept': '*/*',
+                        'x-api-key': RESERVOIR_API_KEY
+                    }
+                });
 
-                        if (sale.timestamp >= oneDayAgo) {
-                            volumes.oneDay.volume += saleValue;
-                            volumes.oneDay.count++;
+                if (!response.ok) {
+                    throw new Error(`Reservoir API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Process sales from this page
+                data.sales?.forEach(sale => {
+                    const isWildSale = sale.price?.currency?.contract?.toLowerCase() === WILD_TOKEN.toLowerCase();
+                    const isWWMMSale = (sale.fillSource?.toLowerCase()?.includes('wilder') || 
+                                      sale.orderSource?.toLowerCase()?.includes('wilder') ||
+                                      sale.orderSource?.toLowerCase()?.includes('wwmm'));
+
+                    if (isWildSale && isWWMMSale) {
+                        try {
+                            const saleValue = BigInt(sale.price.amount.raw);
+                            volumes.allTime.volume += saleValue;
+                            volumes.allTime.count++;
+
+                            if (sale.timestamp >= sevenDaysAgo) {
+                                volumes.sevenDay.volume += saleValue;
+                                volumes.sevenDay.count++;
+
+                                if (sale.timestamp >= oneDayAgo) {
+                                    volumes.oneDay.volume += saleValue;
+                                    volumes.oneDay.count++;
+                                }
+                            }
+                        } catch (error) {
+                            console.error("Error processing sale:", sale, error);
                         }
                     }
-                }
-            });
+                });
+
+                // Check if there are more pages
+                continuation = data.continuation;
+                hasMore = !!continuation && data.sales?.length > 0;
+
+                // Add a small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
 
             const wildPrice = await this.getWildPrice();
             
